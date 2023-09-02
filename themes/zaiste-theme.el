@@ -9,8 +9,8 @@
   "A light theme inspired by Bluloco"
 
   ;; name        default   256       16
-  ((bg         '("#f0f0f0" nil       nil            ))
-   (bg-alt     '("#fafafa" nil       nil            ))
+  ((bg         '("#f0f0f0" "blu"     "blue"         ))
+   (bg-alt     '("#fafafa" "blue"    "blue"         ))
    (base0      '("#efefef" "#efefef" "white"        ))
    (base1      '("#e7e7e7" "#e7e7e7" "brightblack"  ))
    (base2      '("#dfdfdf" "#dfdfdf" "brightblack"  ))

@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: org golang
+# key: +g
+# --
+
+#+BEGIN_SRC go
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+   $1
+}
+#+END_SRC

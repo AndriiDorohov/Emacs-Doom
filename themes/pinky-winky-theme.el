@@ -165,9 +165,9 @@ Can be an integer to determine the exact padding."
    (outline-minor-7 :background (doom-lighten red 0.81) :foreground bg :extend t :weight 'bold)
    (outline-minor-8 :background (doom-lighten red 0.82) :foreground bg :extend t :weight 'bold)
 ;;;; Pair parent face
-   (sp-show-pair-match-face :foreground (doom-darken dark-red 0.1) :background nil)
-   (show-paren-match :foreground (doom-darken dark-red 0.1) :background nil)
-   (show-paren-match-expression :foreground (doom-darken dark-red 0.1) :background nil)
+   (sp-show-pair-match-face :foreground (doom-darken dark-red 0.1) :background 'unspecified)
+   (show-paren-match :foreground (doom-darken dark-red 0.1) :background 'unspecified)
+   (show-paren-match-expression :foreground (doom-darken dark-red 0.1) :background 'unspecified)
 ;;;; Region
    (region :background (doom-lighten violet 0.85))
 ;;;; Cursor
