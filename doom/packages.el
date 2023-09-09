@@ -49,8 +49,12 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t
 
+(package! sql)
+(package! emacsql
+  :recipe (:host github :repo "magit/emacsql"))
+
 (package! all-the-icons-ivy-rich)
-(package! ivy-posframe)
+;;(package! ivy-posframe)
 (package! all-the-icons-dired)
 (package! bm)
 (package! google-translate)
@@ -58,7 +62,7 @@
 (package! rainbow-mode)
 (package! heaven-and-hell)
 (package! nyan-mode)
-(package! wakatime-mode)
+;;(package! wakatime-mode)
 (package! indent-guide)
 ;;; Visual
 (package! centaur-tabs)
@@ -69,12 +73,21 @@
 ;; (package! flight-attendant :recipe (:host github :repo "fkr-0/flight-attendant.el"))
 ;; required for copilot
 (package! editorconfig)
-(package! copilot :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
+;;(package! copilot :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 
+(package! yasnippet)
+
+(package! company-quickhelp)
+(package! company)
 (package! company-posframe)
+(package! company-jedi)
+(package! company-lsp)
+
+
 ;;; Lsp
 ;; (package! lsp-mode)
 (package! lsp-ui)
+;; (package! lsp-python-ms)
 ;; (package! lsp-dart :recipe (:host github :repo "emacs-lsp/lsp-dart" :pin "b99f743302a4e77b1e149bbb1b325b6f0bfc38ad"))
 ;; (package! lsp-dart :pin "4d28d13d8b468bfb8f992da0ea450269d672562c")
 (package! lsp-dart :recipe (:host github :repo "emacs-lsp/lsp-dart"))
@@ -90,8 +103,10 @@
 
 ;;; Treesitter
 ;; (package! tree-sitter :pin "48b06796a3b2e76ce004972d929de38146eafaa0" :recipe (:host github :repo "emacs-tree-sitter/elisp-tree-sitter"))
-(package! tree-sitter)
-(package! tree-sitter-langs)
+;;(package! tree-sitter)
+;;(package! tree-sitter-langs)
+;;(package! tree-sitter-langs :recipe (:local-repo "/Users/macos/tree-sitter-langs"))
+
 (package! msgu :recipe (:host github :repo "jcs-elpa/msgu"))
 (package! ts-docstr
   :recipe (:host github :repo "emacs-vs/ts-docstr" :files (:defaults "langs/*.el")))
@@ -108,9 +123,6 @@
 (package! treemacs-magit)
 (package! treemacs-persp)
 (package! treemacs-tab-bar)
-
-
-
 
 ;;; Languages
 ;;;; Flutter
@@ -131,7 +143,7 @@
 ;;;; Python
 (package! pylint)
 (package! pipenv)
-(package! python-mode)
+;; (package! python-mode)
 ;; (package! pyenv-mode)
 (package! lsp-python-ms)
 (package! lsp-pyright)
@@ -153,7 +165,7 @@
 
 ;;; Performance benchmark/startup
 (package! explain-pause-mode :recipe (:host github :repo "lastquestion/explain-pause-mode"))
-(package! benchmark-init)
+;;(package! benchmark-init)
 
 ;;; Compile
 ;; (package! compile-eslint :recipe (:host github :repo "Fuco1/compile-eslint" :files ("compile-eslint.el")))
@@ -180,7 +192,7 @@
 (package! emmet-mode)
 (package! turbo-log :recipe (:host github :repo "artawower/turbo-log"))
 ;; (package! turbo-log :recipe (:host github :repo "artawower/turbo-log" :branch "enchancement/jump-inserting"))
-(package! dap-mode)
+;;(package! dap-mode)
 (package! reverse-im)
 (package! prettier)
 
@@ -196,8 +208,10 @@
 (package! package-build)
 ;;; GIT
 ;; (package! blamer :recipe (:host github :repo "artawower/blamer.el" :branch "enhancement/truncated-lines"))
-(package! blamer)
-(package! blamer :recipe (:host github :repo "artawower/blamer.el"))
+
+;;(package! blamer)
+;;(package! blamer :recipe (:host github :repo "artawower/blamer.el"))
+
 (package! sideline :recipe (:host github :repo "emacs-sideline/sideline"))
 (package! sideline-blame :recipe (:host github :repo "emacs-sideline/sideline-blame"))
 (package! sideline-lsp)
@@ -217,7 +231,7 @@
 
 ;;; ~UNCATEGORIZED YET
 (package! hydra)
-;; (package! company-box)
+(package! company-box)
 (package! quicktype :recipe (:host github :repo "artawower/quicktype.el"))
 (package! origami)
 ;; (package! ivy
@@ -242,10 +256,10 @@
 ;;; Org mode
 ;; (package! polymode)
 ;; (package! poly-org)
-(package! ox-gfm)
-(package! ob-dart)
-(package! oauth2)
-(package! org-caldav)
+;;(package! ox-gfm)
+;;(package! ob-dart)
+;;(package! oauth2)
+;;(package! org-caldav)
 (package! org-superstar)
 (unpin! org-roam)
 (package! web-roam
@@ -253,15 +267,15 @@
 (package! org-roam)
 (package! org-roam-ui :recipe (:host github :repo "org-roam/org-roam-ui" :files ("*.el" "out")))
 (package! org-fancy-priorities)
-;; (package! org-modern)
+;;(package! org-modern)
 ;;;; Org babel
-(package! ob-restclient)
-(package! ob-async)
+;;(package! ob-restclient)
+;;(package! ob-async)
 ;;; Reading
 ;;;; Rss
-(package! elfeed-score)
+;;(package! elfeed-score)
 ;;;; Pocket
-(package! pocket-reader)
+;;(package! pocket-reader)
 ;;; Agenda
 
 ;;; Collaboration

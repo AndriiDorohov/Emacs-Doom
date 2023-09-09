@@ -42,8 +42,9 @@
 ;; change `org-directory'. It must be set before org loads!
  (setq org-directory "~/org/")
 
+;;  (map! :n "m-l" #'comment-line)
 
-;; Whenever you reconfigure a package, make sure to wrap your config in an
+;; whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
 ;;
 ;;   (after! PACKAGE
@@ -75,13 +76,7 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-
-(custom-set-variables '(wakatime-api-key "waka_25ebfc19-d5cb-4603-87c6-cd8cb409aea0"))
-
-
-(when init-file-debug
-  (require 'benchmark-init)
-  (add-hook 'doom-first-input-hook #'benchmark-init/deactivate))
+(global-set-key (kbd "C-c C-o") 'run-python)
 
 (setq warning-minimum-level :emergency)
 (setq read-process-output-max (* 1024 1024))
@@ -96,18 +91,13 @@
 (setq +m-color-main "#61AFEF"
       +m-color-secondary "red")
 
-(use-package! modus-themes
-  :defer t)
+;;(use-package! modus-themes
+;;  :defer t)
 
-(setq doom-theme 'doom-moonlight)
+(setq doom-theme 'doom-challenger-deep)
+;;(setq doom-theme 'doom-moonlight)
 
 (setq fancy-splash-image "/Users/macos/.doom.d/icons/I-am-doom.png")
-
-(use-package! auto-dark
-  :defer 5
-  :config
-  (setq auto-dark--dark-theme 'doom-moonlight)
-  (setq auto-dark--light-theme 'pinky-winky))
 
 ;; (setq display-line-numbers-type nil)
 ;; (setq display-line-numbers nil)
@@ -167,7 +157,8 @@
   (add-to-list 'default-frame-alist '(alpha . (90 . 90))))
 
 (use-package! rainbow-mode
-  :hook (((css-mode scss-mode org-mode typescript-mode js-mode emacs-lisp-mode). rainbow-mode))
+
+:hook (((css-mode scss-mode org-mode typescript-mode js-mode emacs-lisp-mode). rainbow-mode))
   :defer 5)
 
 (use-package! doom-modeline
@@ -348,6 +339,7 @@ Version 2015-12-08"
 (use-package! explain-pause-mode
   :defer t)
 
+
 (use-package! dirvish
   :init
   (dirvish-override-dired-mode)
@@ -438,6 +430,15 @@ Version 2015-12-08"
   :config
   (setq bookmark-save-flag 1)
   (setq bookmark-default-file "~/.doom.d/bookmarks"))
+
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init 'python))
+
+(after! vterm
+  (setq vterm-shell "/bin/zsh"))
 
 (use-package! vterm-toggle
   :defer t
@@ -632,25 +633,7 @@ Version 2015-12-08"
                          (insert "/")))
               ("s-<return>" . vertico-exit-input)))
 
-(use-package! wakatime-mode
-  :defer 3
-  :config
-  (global-wakatime-mode))
 
-(use-package! wakatime-ui
-  :load-path "~/.doom.d/"
-  :defer 4
-  :custom
-;;  (wakatim-ui-api-url "https://wakatime.com/share/@darkawower/bb8cf0d7-3554-4297-ac4d-01f8a155073c.svg")
-  (wakatim-ui-schedule-url "https://wakatime.com/share/@darkawower/af1bfb85-2c8b-44e4-9873-c4a91b512e8d.png")
-  :config
-  (wakatime-ui-mode))
-
-;; use-package! lsp-grammarly
-;;  :defer t)
-  ;; :hook (text-mode . (lambda ()
-  ;;                      (require 'lsp-grammarly)
-  ;;                      (lsp-deferred))))
 
 (use-package! google-translate
   :defer 10
@@ -726,36 +709,6 @@ Version 2015-12-08"
          ("C-x j p" . quicktype-paste-json-as-type)
          ("C-x j q" . quicktype)))
 
-(use-package! tree-sitter-langs)
-
-(use-package! tree-sitter
-  :after (tree-sitter-langs spell-fu)
-  :hook ((go-mode typescript-mode css-mode typescript-tsx-mode html-mode scss-mode ng2-mode js-mode rust-mode ng2-ts-mode ng2-html-mode) . tree-sitter-hl-mode)
-  :init
-  (setq tsc-dyn-get-from nil)
-  :config
-  (setq tsc-dyn-get-from '(:github))
-  (setq tsc-dyn-get-from nil)
-  (advice-add 'tree-sitter-hl-mode :before 'my-set-spellfu-faces)
-  (push '(ng2-html-mode . html) tree-sitter-major-mode-language-alist)
-  (push '(ng2-ts-mode . typescript) tree-sitter-major-mode-language-alist)
-  (push '(scss-mode . css) tree-sitter-major-mode-language-alist)
-  (push '(scss-mode . typescript) tree-sitter-major-mode-language-alist)
-  (tree-sitter-require 'tsx)
-  (add-to-list 'tree-sitter-major-mode-language-alist '(typescript-tsx-mode . tsx)))
-
-(use-package! tree-edit
-  :defer t)
-
-(use-package! evil-tree-edit
-  :after tree-edit)
-
-(use-package! tree-edit
-  :defer t)
-
-(use-package! evil-tree-edit
-  :after tree-edit)
-
 
 (use-package ts-docstr
   :after tree-sitter
@@ -802,24 +755,6 @@ Version 2015-12-08"
   (add-to-list 'compilation-error-regexp-alist '("[[:blank:]]*\\([/_\\.[:alnum:]-]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\) - error.*$" 1 2 3))
   ;; Angular
   (add-to-list 'compilation-error-regexp-alist '("^Error: \\([_[:alnum:]-/.]*\\):\\([0-9]+\\):\\([0-9]+\\)" 1 2 3)))
-
-
-(use-package! company
-  :defer t
-  :bind (:map evil-insert-state-map ("C-'" . company-yasnippet)
-         :map company-active-map
-         ("<escape>" . (lambda () (interactive)
-                         (company-cancel)
-                         (evil-normal-state))))
-  :config
-  (setq company-idle-delay 0.2)
-  (setq company-quick-access-modifier 'super)
-  (setq company-show-quick-access t)
-  (setq company-minimum-prefix-length 1)
-  (setq company-dabbrev-char-regexp "[A-z:-]")
-  (custom-set-variables
-   '(company-quick-access-keys '("1" "2" "3" "4" "5" "6" "7" "8" "9" "0"))
-   '(company-quick-access-modifier 'super)))
 
 
 (use-package! floobits
@@ -881,23 +816,16 @@ Version 2015-12-08"
 (use-package! npm
   :defer t)
 
-(after! python
-  ;; Встановити відступи на 4 пробіли
-  (setq python-indent-offset 4)
 
-  ;; Використовувати пробіли для відображення відступів
-  (setq python-indent-guess-indent-offset-verbose nil)
-  (setq python-indent-guess-indent-offset nil)
-  
-  ;; Вимкнути авто-вирівнювання за допомогою Tab
-  (setq python-indent-guess-indent-offset-verbose nil)
-  (setq python-indent-guess-indent-offset nil)
-  
-  ;; Встановити максимальну довжину рядка на 79 символів
-  (setq fill-column 79)
-  
-  ;; Включити автоматичне вирівнювання
-  (setq python-auto-indent t))
+(use-package! python)
+
+(pyvenv-mode 1)
+;; (pyvenv-tracking-mode 1)
+
+;;(add-hook 'python-mode-hook (lambda () (local-set-key (kbd "C-c C-c") 'run-python)))
+
+;;(add-hook 'python-mode-hook 'run-python)
+
 
 (map! :leader
       (:prefix ("t" . "tests")
@@ -907,14 +835,66 @@ Version 2015-12-08"
       (:prefix ("i" . "interpreter")
         :desc "Run Python" "i" #'python-shell-switch-to-shell))
 
-(after! company
-  (setq company-idle-delay 0.2)
-  (setq company-minimum-prefix-length 2))
-
 (after! flycheck
   (setq flycheck-python-pylint-executable "pylint")
   (setq flycheck-python-pyright-executable nil)
   (flycheck-add-next-checker 'python-flake8 'python-pylint))
+
+
+(add-hook 'python-mode-hook #'yas-minor-mode)
+
+(use-package company-box
+  :hook (company-mode . company-box-mode)
+  :config
+  (setq company-box-icons-alist 'company-box-icons-all-the-icons)
+  (setq company-box-backends-colors nil) ; Вимкнути кольори для backends
+  (add-to-list 'company-box-icons-functions
+               '(lambda (candidate)
+                  (when (and (derived-mode-p 'python-mode)
+                             (or (string= (substring candidate 0 1) "__")
+                                 (string= (substring candidate 0 1) "_")))
+                    '("" . nil)))) ; Замініть на іконку Python, якщо це ім'я змінної/функції
+  )
+
+(add-hook 'python-mode-hook 'company-box-mode)
+
+
+;;(setq lsp-pyright-multi-root nil)
+;;(use-package! lsp-pyright
+;;  :defer t
+;;  :config
+;;  (setq lsp-pyright-auto-import-completions t)
+;;  (setq lsp-pyright-auto-search-paths t)
+;;  (setq lsp-pyright-log-level "trace")
+;;  (setq lsp-pyright-multi-root nil)
+;;  (setq lsp-pyright-use-library-code-for-types t)
+;;  (setq lsp-pyright-venv-directory "/Users/macos/.local/share/virtualenvs/myenv")
+;;  (setq lsp-pyright-diagnostic-mode "workspace"))
+
+
+(use-package! lsp
+  :commands lsp
+  :init
+  (setq lsp-python-ms-executable "mspyls")
+  :config
+  (setq lsp-pyls-plugins-pycodestyle-enabled t)    ; Увімкнення pycodestyle
+  (setq lsp-pyls-plugins-pyflakes-enabled t)       ; Увімкнення pyflakes
+  (setq lsp-pyls-plugins-mccabe-enabled t)         ; Увімкнення mccabe
+  (setq lsp-pyls-plugins-pydocstyle-enabled t)     ; Увімкнення pydocstyle
+  (setq lsp-pyls-plugins-flake8-enabled t)         ; Увімкнення flake8
+  (setq lsp-pyls-plugins-rope-completion-enabled t) ; Увімкнення rope-completion
+  (setq lsp-pyls-plugins-autopep8-enabled t)        ; Увімкнення autopep8
+  (setq lsp-pyls-plugins-yapf-enabled t)            ; Увімкнення yapf
+  (setq lsp-pyls-plugins-pylint-enabled t)          ; Увімкнення pylint
+  (setq lsp-pyls-plugins-black-enabled t)           ; Увімкнення black
+  (setq lsp-pyls-plugins-bandit-enabled t))         ; Увімкнення bandit
+
+(add-hook 'python-mode-hook #'lsp-deferred)
+
+
+(use-package! sql
+  :config
+  (setq sql-sqlite-program "sqlite3"))
 
 (use-package! lsp-volar
   :after lsp-mode)
@@ -1017,9 +997,7 @@ Version 2015-12-08"
 (use-package! magit
   :defer t
   :bind (:map magit-mode-map
-         ("s-<return>" . magit-diff-visit-worktree-file)
-         :map evil-normal-state-map
-         ("SPC g i" . (lambda () (interactive) (wakatime-ui--clear-modeline) (magit-status))))
+         ("s-<return>" . magit-diff-visit-worktree-file))
   :hook
   (magit-process-mode . compilation-minor-mode)
   :config
@@ -1048,13 +1026,19 @@ Version 2015-12-08"
          :map evil-normal-state-map
          ("SPC g l g" . gist-list)))
 
-;; (use-package! forge
-;;  :after magit
-;;  :config
-;;  (setq auth-sources '("~/.authinfo"))
-;;  (push `(,+m-work-gitlab-url ,(concat +m-work-gitlab-url "/api/v4")
-;;          "gpalex" forge-gitlab-repository)
-;;        forge-alist))
+(use-package! forge
+  :after magit
+  :config
+  (setq auth-sources '("~/.authinfo"))
+  (setq forge-alist
+        `(("github.com"
+           "api.github.com"
+           ,nil
+           ,nil
+           "AndriiDorohov"
+           ,nil
+           ,nil))))
+
 
 (after! git-gutter
   (global-set-key (kbd "C-x p") 'git-gutter:previous-hunk)
@@ -1140,7 +1124,9 @@ Version 2015-12-08"
 
     (org-babel-do-load-languages
      'org-babel-load-languages
-     '((typescript . t)
+     '((emacs-lisp . t)
+       (sqlite . t)
+       (typescript . t)
        (js . t)
        (restclient . t)))
 
@@ -1155,8 +1141,6 @@ Version 2015-12-08"
 (if (assoc "\\.pdf\\'" org-file-apps)
          (setcdr (assoc "\\.pdf\\'" org-file-apps) 'emacs)
        (add-to-list 'org-file-apps '("\\.pdf\\'" . emacs) t))))
-
-
 
 (use-package! svg-tag-mode
   :defer t
@@ -1248,7 +1232,6 @@ Version 2015-12-08"
                                     (?3 . "⮮")
                                     (?4 . "☕")
                                     (?I . "Important"))))
-
 (use-package! org-indent
   :defer 8
   :init
@@ -1259,7 +1242,7 @@ Version 2015-12-08"
   :hook (org-mode . org-superstar-mode)
   :config
   (setq org-directory "~/Desktop/EMACS_ORG")
-  (setq org-agenda-files (append (directory-files-recursively "~/Desktop/EMACS_ORG" "\\.org$"))))
+  (setq org-agenda-files (append (directory-files-recursively "~/Desktop/EMACS_ORG/" "\\.org$"))))
 
 (use-package! org-roam
   :after org
@@ -1323,11 +1306,6 @@ Version 2015-12-08"
   :bind (:map evil-normal-state-map
               ("SPC n p" . web-roam-publish-file)))
 
-(use-package! ob-async
-  :defer t
-  :config
-  (setq ob-async-no-async-languages-alist '("ipython")))
-
 (use-package! restclient
   :defer t)
 
@@ -1342,19 +1320,6 @@ Version 2015-12-08"
   (add-hook (intern (concat (symbol-name mode) "-hook"))
             (lambda () (display-line-numbers-mode 1))))
 
-
-;; (use-package! pretty-agenda
-;;  :load-path "~/.doom.d/"
-;;  :defer 15)
-
-
-(after! python
-  (setq display-buffer-alist
-        `((,(regexp-quote "*Python*")
-           (display-buffer-in-side-window)
-           (window-width . 0.25)
-           (side . right)
-           (slot . -1)
-           (window-parameters . ((no-other-window . t)))
-           (reusable-frames . nil)))))
+(after! projectile
+  (setq projectile-project-root-files-bottom-up (remove ".git" projectile-project-root-files-bottom-up)))
 
