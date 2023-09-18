@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: lisp
-# key: l
-# --
-
-.DS_Store
-logs/*
-bookmarks

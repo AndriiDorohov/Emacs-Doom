@@ -154,9 +154,9 @@ Can be an integer to determine the exact padding."
    (rjsx-tag :foreground red)
    (rjsx-attr :foreground orange)
 ;;;; Pair parent face
-   (sp-show-pair-match-face :foreground (doom-darken light-red 0.1) :background 'unspecified)
-   (show-paren-match :foreground (doom-darken light-red 0.1) :background 'unspecified)
-   (show-paren-match-expression :foreground (doom-darken light-red 0.1) :background 'unspecified)
+   (sp-show-pair-match-face :foreground (doom-darken light-red 0.1) :background nil)
+   (show-paren-match :foreground (doom-darken light-red 0.1) :background nil)
+   (show-paren-match-expression :foreground (doom-darken light-red 0.1) :background nil)
 ;;; Doom
 ;;;; Workspace
    (+workspace-tab-selected-face :foreground (doom-lighten grey 0.8) :background blue :weight 'bold)

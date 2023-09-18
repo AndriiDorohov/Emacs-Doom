@@ -32,15 +32,15 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-;; (setq doom-theme 'doom-one)
+;;(setq doom-theme 'doom-one)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-;; (setq display-line-numbers-type t)
+;;(setq display-line-numbers-type t)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
- (setq org-directory "~/org/")
+(setq org-directory "~/org/")
 
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
@@ -76,7 +76,6 @@
 ;; they are implemented.
 
 
-
 (setq warning-minimum-level :emergency)
 (setq read-process-output-max (* 1024 1024))
 (setq-default left-margin-width 1 right-margin-width 2) ; Define new widths.
@@ -84,49 +83,37 @@
 (setq user-full-name "AndriiDorohov"
       user-mail-address "wedpositive@gmail.com")
 
+(when (eq system-type 'darwin)
+  (setq browse-url-firefox-program "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser")
+  (setq browse-url-generic-program "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
+        browse-url-browser-function 'browse-url-generic))
+
+
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
 
 (setq +m-color-main "#61AFEF"
       +m-color-secondary "red")
 
-(use-package! modus-themes
-  :defer t)
+;;(use-package! modus-themes
+;;  :defer t)
 
-(setq doom-theme 'doom-moonlight)
+(setq doom-theme 'doom-dracula)
 
 
 ;;(setq doom-theme 'doom-moonlight)
 
-(setq fancy-splash-image "/Users/macos/.doom.d/icons/I-am-doom.png")
+(setq fancy-splash-image "/Users/apogee/.config/doom/icons/I-am-doom.png")
 
-(use-package! auto-dark
-  :defer 5
-  :config
-  (setq auto-dark--dark-theme 'doom-moonlight)
-  (setq auto-dark--light-theme 'pinky-winky))
-
-(use-package! heaven-and-hell
-  :after doom-themes
-  :init
-  (setq heaven-and-hell-theme-type 'dark) ;; Omit to use light by default
-  (setq heaven-and-hell-themes
-        '((light . pinky-winky)
-          (dark . tokio-night)))
-  (setq heaven-and-hell-load-theme-no-confirm t)
-  :hook (after-init . heaven-and-hell-init-hook)
-  :bind (("C-c t" . heaven-and-hell-toggle-theme)))
-
-;; (setq display-line-numbers-type nil)
-;; (setq display-line-numbers nil)
 
 (set-frame-font "JetBrainsMono Nerd Font 15" nil t)
 (custom-set-faces
  `(font-lock-comment-face ((t (:font "ChalkBoard SE" :italic t :height 1.0))))
  `(font-lock-string-face ((t (:italic t :height 1.0)))))
 
-(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 17))
-
+(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 16)
+      doom-variable-pitch-font (font-spec :family "JetBrainsMono Nerd Font" :size 16)
+      doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 16))
 
 (defconst jetbrains-ligature-mode--ligatures
   '("-->" "//" "/**" "/*" "*/" "<!--" ":=" "->>" "<<-" "->" "<-"
@@ -170,33 +157,24 @@
   :init
   (nyan-mode))
 
-(progn
-  (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
-  (add-to-list 'default-frame-alist '(alpha . (90 . 90))))
+;;(progn
+;;  (set-frame-parameter (selected-frame) 'alpha '(95 . 95))
+;;  (add-to-list 'default-frame-alist '(alpha . (95 . 95))))
+
 
 (use-package! rainbow-mode
   :hook (((css-mode scss-mode org-mode typescript-mode js-mode emacs-lisp-mode). rainbow-mode))
   :defer 5)
 
 (use-package! doom-modeline
+  :hook (after-init . doom-modeline-mode)
   :defer t
   :config
   (setq doom-modeline-buffer-file-name-style 'file-name))
 
-(defun my-add-additional-space-when-not-exist (_)
-  "Add additional sapce if previous char is not space!"
-  (unless (eq (char-before) ? )
-    (insert " ")))
+(setq doom-modeline-height 1)
 
-(advice-add 'org-insert-link :before 'my-add-additional-space-when-not-exist)
-
-(defun format-org-mode-block ()
-  "Format org mode code block"
-  (interactive "p")
-  (org-edit-special)
-  (format-all-ensure-formatter)
-  (format-all-buffer)
-  (org-edit-src-exit))
+;;Browser
 
 (defun my-switch-to-xwidget-buffer (&optional a b)
   "Switch to xwidget buffer."
@@ -213,9 +191,13 @@
       (setq browse-url-browser-function #'browse-url-default-browser)
       (advice-remove 'browse-url #'my-switch-to-xwidget-buffer))))
 
+
+;;Navigation
+
 (defun switch-to-first-matching-buffer (regex)
   (switch-to-buffer (car (remove-if-not (apply-partially #'string-match-p regex)
                                         (mapcar #'buffer-name (buffer-list))))))
+;;Focus buffer by name
 
 (defun +select-window-by-name (regexp)
   "Selects the window with buffer NAME"
@@ -224,6 +206,8 @@
      (lambda (window)
        (string-match-p regexp (buffer-name (window-buffer window))))
      (window-list-1 nil 0 t)))))
+
+;;TERMINAL
 
 (defun my-remove-cr (&optional begin end)
   "Remove line prefixes ending with carriage-return.
@@ -234,6 +218,19 @@ BEGIN END specifies region, otherwise works on entire buffer."
     (while (re-search-forward "^.*\033\\[2K\033\\[1G" end t)
       (replace-match ""))))
 
+;;Add myvenv
+(defun my-activate-virtualenv ()
+  (interactive)
+  (let ((venv-path "/Users/apogee/.local/share/virtualenvs/myenv/bin/activate"))
+    (when (file-exists-p venv-path)
+      (vterm-send-string (format "source %s" venv-path))
+      (vterm-send-return))))
+
+;; (add-hook 'vterm-mode-hook #'my-activate-virtualenv)
+
+
+;;WORKSPACES
+
 (defun toggle-maximize-buffer () "Maximize buffer"
        (interactive)
        (if (= 1 (length (window-list)))
@@ -242,64 +239,28 @@ BEGIN END specifies region, otherwise works on entire buffer."
            (window-configuration-to-register '_)
            (delete-other-windows))))
 
-(defun xah-copy-to-register-1 ()
-  "Copy current line or text selection to register 1.
-See also: `xah-paste-from-register-1', `copy-to-register'.
-
-;;;; Register copy past
-URL `http://xahlee.info/emacs/emacs/elisp_copy-paste_register_1.html'
-Version 2017-01-23"
-  (interactive)
-  (let ($p1 $p2)
-    (if (region-active-p)
-        (progn (setq $p1 (region-beginning))
-               (setq $p2 (region-end)))
-      (progn (setq $p1 (line-beginning-position))
-             (setq $p2 (l(defun xah-paste-from-register-1 ()
-                           "Paste text from register 1.
-See also: `xah-copy-to-register-1', `insert-register'.
-URL `http://xahlee.info/emacs/emacs/elisp_copy-paste_register_1.html'
-Version 2015-12-08"
-                           (interactive)
-                           (when (use-region-p)
-                             (delete-region (region-beginning) (region-end)))
-                           (insert-register ?1 t))ine-end-position))))
-    (copy-to-register ?1 $p1 $p2)
-    (message "Copied to register 1: 「%s」." (buffer-substring-no-properties $p1 $p2))))
-
-(defun xah-paste-from-register-1 ()
-  "Paste text from register 1.
-See also: `xah-copy-to-register-1', `insert-register'.
-URL `http://xahlee.info/emacs/emacs/elisp_copy-paste_register_1.html'
-Version 2015-12-08"
-  (interactive)
-  (when (use-region-p)
-    (delete-region (region-beginning) (region-end)))
-  (insert-register ?1 t))
-
-(defun my-open-kitty-right-here ()
-  "Open or switch kitty to root directory of current project."
-  (interactive)
-  (let* ((cmd (concat "open -a kitty.app --args \"cd\" " default-directory)))
-    (shell-command cmd)))
-
+;;COPY PATH CURRENT DIR
 (defun my-copy-pwd ()
   "Copy PWD command to clipboard"
   (interactive)
   (when (buffer-file-name)
     (kill-new (replace-regexp-in-string " " "\\\\\  " (file-name-directory (buffer-file-name))))))
 
+;;COPY CURRENT FILE NAME
 (defun my-copy-file-name ()
   "Copy file name command to clipboard"
   (interactive)
   (when (buffer-file-name)
     (kill-new (file-name-nondirectory (buffer-file-name)))))
 
+;;COPY FULL PATH
 (defun my-copy-full-path ()
   "Copy full path till file to clipboard"
   (interactive)
   (when (buffer-file-name)
     (kill-new (replace-regexp-in-string " " "\\\\\  " (buffer-file-name)))))
+
+;;OPEN VTERM CURRENT BUFFER
 
 (defun my-vterm-change-current-directory-to-active-buffer-pwd ()
   "Just exec CD to pwd of active buffer."
@@ -316,123 +277,141 @@ Version 2015-12-08"
       )
     (evil-window-down 1)))
 
-(setq my-transparency-disabled-p t)
+;;FORGE OPEN REMOTE FILE
 
+(defun my-forge-browse-buffer-file ()
+  (interactive)
+  (browse-url
+   (let
+       ((rev (cond ((and (boundp git-timemachine-mode) git-timemachine-mode) (git-timemachine-kill-revision))
+                   ((and (boundp magit-gitflow-mode) magit-gitflow-mode) (magit-copy-buffer-revision))
+                   (t "master")))
+        (repo (forge-get-repository 'stub))
+        (file (magit-file-relative-name buffer-file-name))
+        (highlight
+         (if
+             (use-region-p)
+             (let ((l1 (line-number-at-pos (region-beginning)))
+                   (l2 (line-number-at-pos (- (region-end) 1))))
+               (format "#L%d-L%d" l1 l2))
+           ""
+           )))
+     (message "rev: %s" rev)
+     (if (not file)
+         (if-let ((path (forge--split-remote-url (forge--get-remote))))
+                  (message "https://%s/%s/%s/commit/%s" (nth 0 path) (nth 1 path) (nth 2 path) rev)
+           (user-error "Cannot browse non-forge remote %s" (forge--get-remote)))
+
+       (forge--format repo "https://%h/%o/%n/blob/%r/%f%L"
+                      `((?r . ,rev) (?f . ,file) (?L . ,highlight)))))))
+
+;;TOGLE TRANCPERANCY
+
+(setq my-transparency-disabled-p t)
 (defun my-toggle-transparency ()
   "Toggle transparency"
   (interactive)
   (let* ((not-transparent-p (and (boundp 'my-transparency-disabled-p) my-transparency-disabled-p))
-         (alpha (if not-transparent-p 100 95)))
+         (alpha (if not-transparent-p 90 100))) ; Змініть значення alpha за замовчуванням
     (setq my-transparency-disabled-p (not not-transparent-p))
     (message "%s" alpha)
     (progn
       (set-frame-parameter (selected-frame) 'alpha `(,alpha . ,alpha))
       (add-to-list 'default-frame-alist `(alpha . (,alpha . ,alpha))))))
 
-(defun my-insert-todo-by-current-git-branch ()
-  "Insert todo for current git branch."
-  (interactive)
-  (let* ((branch-name (magit-get-current-branch))
-         (vw (string-match "\\(?1:[A-Za-z0-9]+\/\\)\\(?2:VW-[0-9]+\\)" branch-name))
-         (task-number (match-string 2 branch-name))
-         (todo-msg (or task-number branch-name)))
-    (insert (format "TODO: %s " todo-msg))
-    (comment-line 1)
-    ;; (forward-line 1)
-    (previous-line)
-    (end-of-line)
-    (indent-according-to-mode)
-    (evil-insert 1)))
+(let ((bg-color (face-background 'default nil 'default)))
+  (set-frame-parameter nil 'background-color bg-color))
 
-(defun my-run-sass-auto-fix ()
-  "Run sass auto fix if cli tool exist"
-  (interactive)
-  (save-window-excursion
-    (let ((default-directory (file-name-directory buffer-file-name)))
-      (async-shell-command "sass-lint-auto-fix")
-      ;; (revert-buffer-no-confirm)
-      (message "SASS FORMATTED"))))
+(my-toggle-transparency)
 
-(use-package! explain-pause-mode
-  :defer t)
+;;TREEMACS
 
-(use-package! dirvish
-  :init
-  (dirvish-override-dired-mode)
-  :custom
-  ;; Go back home? Just press `bh'
-  (dirvish-bookmark-entries
-   '(("h" "~/"                          "Home")
-     ("d" "~/Downloads/"                "Downloads")))
-  ;; (dirvish-header-line-format '(:left (path) :right (free-space)))
-  (dirvish-mode-line-format ; it's ok to place string inside
-   '(:left (sort file-time " " file-size symlink) :right (omit yank index)))
-  ;; Don't worry, Dirvish is still performant even you enable all these attributes
-  (dirvish-attributes '(all-the-icons file-size collapse subtree-state vc-state git-msg))
-  ;; Maybe the icons are too big to your eyes
-  (dirvish-all-the-icons-height 0.8)
-  ;; In case you want the details at startup like `dired'
-  ;; (dirvish-hide-details nil)
-  :config
-  ;; (dirvish-peek-mode)
-  (setq dired-kill-when-opening-new-dired-buffer t)
-  (setq dirvish-reuse-session t)
-  ;; Dired options are respected except a few exceptions, see *In relation to Dired* section above
-  (setq dired-dwim-target t)
-  (setq delete-by-moving-to-trash t)
-  (setq dirvish-default-layout '(1 0.3 0.7))
-  ;; Enable mouse drag-and-drop files to other applications
-  (setq dired-mouse-drag-files t)                   ; added in Emacs 29
-  (setq mouse-drag-and-drop-region-cross-program t) ; added in Emacs 29
-  (setq dired-listing-switches
-        "-l --almost-all --human-readable --time-style=long-iso --group-directories-first --no-group")
-  (setq dirvish-attributes '(vc-state subtree-state collapse git-msg file-size))
-  (advice-add #'+dired/quit-all :after (lambda () (interactive) (dirvish-kill (dirvish-prop :dv))))
-  :bind
-  ;; Bind `dirvish|dirvish-side|dirvish-dwim' as you see fit
-  (("C-c f" . dirvish-fd)
-   :map dired-mode-map ; Dirvish respects all the keybindings in this map
-   ("h" . dired-up-directory)
-   ("j" . dired-next-line)
-   ("k" . dired-previous-line)
-   ("l" . dired-find-file)
-   ("i" . wdired-change-to-wdired-mode)
-   ("." . dired-omit-mode)
-   ("b"   . dirvish-bookmark-jump)
-   ("f"   . dirvish-file-info-menu)
-   ("y"   . dirvish-yank-menu)
-   ("N"   . dirvish-narrow)
-   ("^"   . dirvish-history-last)
-   ("s"   . dirvish-quicksort) ; remapped `dired-sort-toggle-or-edit'
-   ("?"   . dirvish-dispatch)  ; remapped `dired-summary'
-   ("TAB" . dirvish-subtree-toggle)
-   ("SPC" . dirvish-history-jump)
-   ("M-n" . dirvish-history-go-forward)
-   ("M-p" . dirvish-history-go-backward)
-   ("M-l" . dirvish-ls-switches-menu)
-   ("M-m" . dirvish-mark-menu)
-   ("M-f" . dirvish-toggle-fullscreen)
-   ("M-s" . dirvish-setup-menu)
-   ("M-e" . dirvish-emerge-menu)
-   ("M-j" . dirvish-fd-jump)))
-
-(use-package! all-the-icons-dired
-  :hook (dired-mode . all-the-icons-dired-mode)
-  :config
-  (setq all-the-icons-dired-monochrome nil) ; Використовуйте кольорові іконки
-  )
-
-;; (setq dirvish-attributes '(all-the-icons file-size collapse subtree-state vc-state git-msg))
-
-(use-package! treemacs
+(use-package treemacs
   :defer t
-  :custom-face
-  (font-lock-doc-face ((t (:inherit nil))))
-  (doom-themes-treemacs-file-face ((t (:inherit font-lock-doc-face :slant italic))))
-  (doom-themes-treemacs-root-face ((t (:inherit nil :slant italic))))
-  (treemacs-root-face ((t (:inherit variable-pitch :slant italic))))
-)
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
+          treemacs-deferred-git-apply-delay        0.5
+          treemacs-directory-name-transformer      #'identity
+          treemacs-display-in-side-window          t
+          treemacs-eldoc-display                   'simple
+          treemacs-file-event-delay                2000
+          treemacs-file-extension-regex            treemacs-last-period-regex-value
+          treemacs-file-follow-delay               0.2
+          treemacs-file-name-transformer           #'identity
+          treemacs-follow-after-init               t
+          treemacs-expand-after-init               t
+          treemacs-find-workspace-method           'find-for-file-or-pick-first
+          treemacs-git-command-pipe                ""
+          treemacs-goto-tag-strategy               'refetch-index
+          treemacs-header-scroll-indicators        '(nil . "^^^^^^")
+          treemacs-hide-dot-git-directory          t
+          treemacs-indentation                     2
+          treemacs-indentation-string              " "
+          treemacs-is-never-other-window           nil
+          treemacs-max-git-entries                 5000
+          treemacs-missing-project-action          'ask
+          treemacs-move-forward-on-expand          nil
+          treemacs-no-png-images                   nil
+          treemacs-no-delete-other-windows         t
+          treemacs-project-follow-cleanup          nil
+          treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+          treemacs-position                        'left
+          treemacs-read-string-input               'from-child-frame
+          treemacs-recenter-distance               0.1
+          treemacs-recenter-after-file-follow      nil
+          treemacs-recenter-after-tag-follow       nil
+          treemacs-recenter-after-project-jump     'always
+          treemacs-recenter-after-project-expand   'on-distance
+          treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
+          treemacs-project-follow-into-home        nil
+          treemacs-show-cursor                     nil
+          treemacs-show-hidden-files               t
+          treemacs-silent-filewatch                nil
+          treemacs-silent-refresh                  nil
+          treemacs-sorting                         'alphabetic-asc
+          treemacs-select-when-already-in-treemacs 'move-back
+          treemacs-space-between-root-nodes        t
+          treemacs-tag-follow-cleanup              t
+          treemacs-tag-follow-delay                1.5
+          treemacs-text-scale                      nil
+          treemacs-user-mode-line-format           nil
+          treemacs-user-header-line-format         nil
+          treemacs-wide-toggle-width               70
+          treemacs-width                           35
+          treemacs-width-increment                 1
+          treemacs-width-is-initially-locked       t
+          treemacs-workspace-switch-cleanup        nil)
 
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode 'always)
+    (treemacs-hide-gitignored-files-mode nil)))
+
+(use-package treemacs-evil
+  :after (treemacs evil))
+
+(use-package treemacs-projectile
+  :after (treemacs projectile))
+
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once))
+
+(use-package treemacs-magit
+  :after (treemacs magit))
+
+(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+  :config (treemacs-set-scope-type 'Perspectives))
+
+(use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
+  :after (treemacs)
+  :config (treemacs-set-scope-type 'Tabs))
+
+;;Bookmark for navigation inside file
 (use-package! bm
   :defer t
   :custom-face
@@ -441,28 +420,15 @@ Version 2015-12-08"
          ("C-M-p" . bm-previous)
          ("s-b" . bm-toggle)))
 
+;;DOOM BOOKMARKS
+
 (use-package! bookmark
   :defer t
   :config
   (setq bookmark-save-flag 1)
   (setq bookmark-default-file "~/.doom.d/bookmarks"))
 
-
-
-
-
-
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init 'python))
-
-
-
-
-
-
-
+;;TERMINAL
 
 (use-package! vterm-toggle
   :defer t
@@ -488,30 +454,35 @@ Version 2015-12-08"
   (setq vterm-kill-buffer-on-exit nil)
   (setq vterm-toggle-scope 'project))
 
-(use-package! hl-todo
+;;FOLDING
+(use-package! origami
   :defer 2
-  :config
-  (setq hl-todo-keyword-faces
-        '(("TODO"   . "#E5C07B")
-          ("FIXME"  . "#E06C75")
-          ("DEBUG"  . "#C678DD")
-          ("REFACTOR"  . "#C678DD")
-          ("GOTCHA" . "#FF4500")
-          ("NOTE"   . "#98C379")
-          ("QUESTION"   . "#98C379")
-          ("STUB"   . "#61AFEF")))
-  (global-hl-todo-mode 1))
+  :bind (:map evil-normal-state-map
+              ("SPC z a" . origami-toggle-node)
+              ("SPC z r" . origami-open-all-nodes)
+              ("SPC z m" . origami-close-all-node))
+  :hook ((ng2-html-mode html-mode) . origami-mode))
 
-(use-package! secret-mode
-  :defer t)
+;;OUTLINE
 
 (use-package! outline-minor-faces
   :after outline
   :config (add-hook 'outline-minor-mode-hook
                     'outline-minor-faces-add-font-lock-keywords))
 
+;;HOLD SIDELINE
+(use-package! sideline
+  :hook (lsp-mode-hook . sideline-mode)
+  :init
+  (setq sideline-backends-right '(sideline-lsp))
+  :defer 2)
+
+;;HYDRA
+
 (use-package! hydra
   :defer t)
+
+;;GLOBAL KEYS
 
 (global-set-key (kbd "C-S-k") 'shrink-window)
 (global-set-key (kbd "s-y") 'yas-expand)
@@ -530,134 +501,96 @@ Version 2015-12-08"
 (global-set-key (kbd "C-s") 'save-buffer)
 (define-key evil-normal-state-map (kbd "SPC w w") 'ace-window)
 
-(use-package! reverse-im
-  :defer 5
-  :config
-  (reverse-im-activate "russian-computer"))
 
-(use-package! evil-leader
-  :after evil
+;;SPELLING
+
+(defun my-set-spellfu-faces ()
+  "Set faces for correct spell-fu working"
+  (interactive)
+  (setq spell-fu-faces-include '(tree-sitter-hl-face:comment
+                                 tree-sitter-hl-face:doc
+                                 tree-sitter-hl-face:string
+                                 tree-sitter-hl-face:function
+                                 tree-sitter-hl-face:variable
+                                 tree-sitter-hl-face:type
+                                 tree-sitter-hl-face:method
+                                 tree-sitter-hl-face:function.method
+                                 tree-sitter-hl-face:function.special
+                                 tree-sitter-hl-face:attribute
+                                 font-lock-comment-face
+                                 font-lock-doc-face
+                                 font-lock-string-face
+                                 lsp-face-highlight-textual
+                                 default))
+  (setq spell-fu-faces-exclude (append spell-fu-faces-exclude
+                                       '(diredfl-file-name))))
+(use-package! spell-fu
   :bind (:map evil-normal-state-map
-         ("f" . avy-goto-word-1)
-         ("SPC n r f" . org-roam-node-find)
-         ("SPC t a" . treemacs-add-project-to-workspace)
-         ("SPC g t" . git-timemachine)
-         ;; Compilation
-         ("SPC c v" . (lambda ()
-                        (interactive)
-                        (compilation-display-error)
-                        (+select-window-by-name "*compilation.*")))
-         ;; CUSTOM
-         ("SPC t i" . my-insert-todo-by-current-git-branch)
-         ;; Org mode
-         ("SPC d t" . org-time-stamp-inactive)
-         ("SPC d T" . org-time-stamp)
-         ("SPC r p" . +python/open-ipython-repl)
-         ("SPC r n" . nodejs-repl)
-         ("SPC t t" . ivy-magit-todos)
-         ("SPC v t t" . my-toggle-transparency)
-         ;; TODO: add check might be roam buffer already opened?
-         ("SPC r u" . (lambda () (interactive)
-                        (org-roam-ui-open)
-                        (run-at-time "0.3 sec" nil (lambda () (org-roam-ui-sync-theme) (my-switch-to-xwidget-buffer)))))
-         ("SPC j" . ace-window)
-         ("SPC w f" . ace-window)
-         ("s-Y" . xah-paste-from-register-1)
-         ("s-p" . yank-from-kill-ring)
-         ("s-r" . (lambda () (interactive) (set-mark-command nil) (evil-avy-goto-char)))
-         ("SPC y k" . yank-from-kill-ring)
-         ("s-." . ace-window)
-         ;; Git
-         ("SPC g o f" . my-forge-browse-buffer-file)
-         :map evil-insert-state-map
-         ("s-Y" . xah-copy-to-register-1)
-         ("s-P" . xah-paste-from-register-1)
-         ("s-p" . yank-from-kill-ring)
-         ("s-." . ace-window)
-         :map evil-visual-state-map
-         ("s-Y" . xah-copy-to-register-1)
-         ("s-P" . xah-paste-from-register-1)
-         ("s-." . ace-window)
-         ("SPC r r" . query-replace))
-  :init
-  (global-evil-leader-mode)
+              ("z g" . spell-fu-word-add))
+  :defer 2
   :config
-  (setq-default evil-kill-on-visual-paste nil)
-  (evil-leader/set-key
-    ;; "f" 'evil-find-char
-    "f" 'avy-goto-char
-    "b" 'my-switch-to-xwidget-buffer
-    "x" 'my-ecmascript-formatter
-    "k" 'save-buffer-without-dtw
-    "w" 'avy-goto-word-0
-    "]" 'flycheck-next-error
-    "[" 'flycheck-previous-error
+  (setq ispell-program-name "aspell")
+  (setq spell-fu-directory "~/config/doom/dictionary")
+  (setq ispell-program-name "aspell"
+        ;;           ;; Notice the lack of "--run-together"
+        ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together" "--run-together-limit=56"))
+  (setq spell-fu-ignore-modes '(dired-mode vterm-mode elfeed-search-mode))
 
-    "d" 'dap-debug
-    "\\" 'ace-window
+  (add-hook 'spell-fu-mode-hook
+            (lambda ()
+              (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "en"))
+              (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "ru"))
+              (spell-fu-dictionary-add
+               (spell-fu-get-personal-dictionary "en-personal" "/Users/apogee/config/doom/dictionary/.pws"))
+              (spell-fu-dictionary-add
+               (spell-fu-get-personal-dictionary "ru-personal" "/Users/apogee/config/doom/dictionary/ru.pws"))))
 
-    "o" 'org-mode
-    "q" 'kill-current-buffer
-    "v" 'vterm
-    "`" 'vterm-toggle-cd
-    "i" 'git-messenger:popup-message
-    "t" 'google-translate-smooth-translate
-    "T" 'google-translate-query-translate
+  ;; Camel case support
+  (setq-default spell-fu-word-regexp
+                (rx
+                 (or
+                  ;; lowercase
+                  (seq
+                   (one-or-more lower)
+                   (opt
+                    (any "'’")
+                    (one-or-more lower)
+                    word-end))
 
-    "a" 'counsel-org-agenda-headlines
-    "c" 'dired-create-empty-file
-    "p" '+format/buffer
-    "s" 'publish-org-blog
-    "g" 'ace-window
-    ;; Evil
-    "=" 'evil-record-macro
-    "-" 'evil-execute-macro
-    "0" 'my-toggle-default-browser
-    ;; "=" 'kmacro-start-macro-or-insert-counter
-    ;; Lsp
-;;    "h" 'lsp-ui-doc-show
-;;    "e" 'lsp-treemacs-errors-list
-;;    "l" 'lsp-execute-code-action
+                  ;; capitalized
+                  (seq
+                   upper
+                   (zero-or-more lower)
+                   (opt
+                    (any "'’")
+                    (one-or-more lower)
+                    word-end))
 
-    "r" 'treemacs-select-window
+                  ;; uppercase
+                  (seq
+                   (one-or-more upper)
+                   (opt
+                    (any "'’")
+                    (one-or-more upper)
+                    word-end)))))
 
-    "m" 'toggle-maximize-buffer
-    "y" 'yas-expand))
+  (defun cs/spell-fu-check-range (pos-beg pos-end)
+    (let (case-fold-search)
+      (spell-fu-check-range-default pos-beg pos-end)))
 
-(use-package! evil-matchit
+  (setq-default spell-fu-check-range #'cs/spell-fu-check-range)
+  (global-spell-fu-mode)
+  (my-set-spellfu-faces))
+
+;;GRAMMAR
+
+(use-package! lsp-grammarly
   :defer t)
+  ;; :hook (text-mode . (lambda ()
+  ;;                      (require 'lsp-grammarly)
+  ;;                      (lsp-deferred))))
 
-(evilmi-load-plugin-rules '(ng2-html-mode) '(html))
-(global-evil-matchit-mode 1)
-
-(use-package! avy
-  :defer t
-  :bind (:map evil-normal-state-map
-              ("SPC k l" . avy-kill-whole-line)
-              ("SPC k r" . avy-kill-region))
-  :custom
-  (avy-single-candidate-jump t)
-  (avy-keys '(?w ?e ?r ?t ?y ?u ?i ?o ?p ?a ?s ?d ?f ?g ?h ?j ?k ?l ?z ?x ?c ?v ?b ?n ?m)))
-
-
-
-(use-package! vertico
-  :defer t
-  :bind (:map vertico-map
-              ("C-d" . (lambda ()
-                         (interactive)
-                         (kill-whole-line)
-                         (insert "~/")))
-              ("C-o" . (lambda ()
-                         (interactive)
-                         (embark-act)))
-              ("C-r" . (lambda ()
-                         (interactive)
-                         (kill-whole-line)
-                         (insert "/")))
-              ("s-<return>" . vertico-exit-input)))
-
-
+;;GOOGLE TRANSLATE
 
 (use-package! google-translate
   :defer 10
@@ -674,465 +607,56 @@ Version 2015-12-08"
         '(("en" . "ru") ("ru" . "en") ))
   (defun google-translate--search-tkk () "Search TKK." (list 430675 2721866130)))
 
-(use-package! flycheck
-  :defer 2
+
+;;PRETTIER
+
+;;(use-package! prettier
+;;  :defer 5
+;;  :hook ((typescript-tsx-mode typescript-mode js2-mode json-mode ng2-mode ng2-html-mode html-mode) . prettier-mode))
+
+;;DEBUG
+
+(require 'dap-python)
+;; Якщо ви встановили debugpy, встановіть його як dap-python-debugger
+(setq dap-python-debugger 'debugpy)
+
+(dap-register-debug-template "Debug Current Python Buffer"
+  (list :type "python"
+        :name "Debug Current Python Buffer"
+        :request "launch"
+        :program nil)) ; Важливо встановити `:program` в `nil`
+
+(use-package! dap-mode
+  :defer t
   :bind (:map evil-normal-state-map
-              ("SPC f ]" . flycheck-next-error)
-              ("SPC f [" . flycheck-previous-error)
-              ("SPC e l" . flycheck-list-errors)))
-
-
-(use-package! prettier
-  :defer 5
-  :hook ((typescript-tsx-mode typescript-mode js2-mode json-mode ng2-mode ng2-html-mode html-mode) . prettier-mode)
-  ;; :config
-  ;; ;; This should prevent reset of encoding
-  ;; (defun custom-prettier ()
-  ;;   (interactive)
-  ;;   (when (member major-mode '(js2-mode typescript-mode typescript-tsx-mode ng2-html-mode vue-mode web-mode ng2-ts-mode))
-  ;;     (prettier-prettify)))
-  ;; (add-hook 'before-save-hook #'custom-prettier t)
-  ;; :hook ((js2-mode typescript-mode ng2-html-mode vue-mode web-mode) . prettier-mode)
-  )
-
-
-(use-package! turbo-log
-  :defer t
-  :bind (("C-s-l" . turbo-log-print)
-         ("C-s-i" . turbo-log-print-immediately)
-         ("C-s-h" . turbo-log-comment-all-logs)
-         ("C-s-s" . turbo-log-uncomment-all-logs)
-         ("C-s-x" . turbo-log-delete-all-logs)
-         ("C-s-[" . turbo-log-paste-as-logger )
-         ("C-s-]" . turbo-log-paste-as-logger-immediately))
-  :custom
-  (turbo-log-allow-insert-without-tree-sitter-p t)
-  ;; (turbo-log-payload-format-template "")
-  ;; (turbo-log-payload-format-template "\x1b[35m%s: ")
-  (turbo-log-payload-format-template "%s: ")
-  :config
-  (turbo-log-configure
-   :modes (typescript-mode js2-mode web-mode ng2-ts-mode js-mode)
-   :strategy merge
-   :post-insert-hooks (prettier-prettify lsp)
-   :msg-format-template "'🦄: %s'"))
-
-(use-package! auto-rename-tag
-  :defer t
-  :hook ((html-mode ng2-html-mode-hook vue-mode web-mode) . auto-rename-tag-mode)
-  :config
-  (auto-rename-tag-mode 1))
-
-(use-package! string-inflection
-  :defer t
-  :bind ("C-s-c" . string-inflection-all-cycle))
-
-(use-package! quicktype
-  :defer t
-  :bind (("C-x j v" . quicktype-json-to-type)
-         ("C-x j p" . quicktype-paste-json-as-type)
-         ("C-x j q" . quicktype)))
-
-(use-package ts-docstr
-  :after tree-sitter
-  :config
-  (setq ts-docstr-key-support t)
-  (setq ts-docstr-ask-on-enable t))
-
-(defun compile-eslint--find-filename ()
-  "Find the filename for current error."
-  (save-match-data
-    (save-excursion
-      (when (re-search-backward (rx bol (group "/" (+ any)) eol))
-        (list (match-string 1))))))
-
-;; (use-package! compile
-;;   :defer t
-;;   :config
-(after! compile
-  (setq compilation-scroll-output t)
-  (setq compilation-error-regexp-alist '())
-  (setq compilation-error-regexp-alist-alist '())
-
-
-  ;; eslint https://github.com/Fuco1/compile-eslint/blob/master/compile-eslint.el
-  (when (not compilation-error-regexp-alist-alist)
-    (setq compilation-error-regexp-alist-alist '()))
-
-  (let ((form `(eslint
-                ,(rx-to-string
-                  '(and (group (group (+ digit)) ":" (group (+ digit)))
-                        (+ " ") (or "error" "warning")))
-                compile-eslint--find-filename
-                2 3 2 1)))
-
-    (if (assq 'eslint compilation-error-regexp-alist-alist)
-        (setf (cdr (assq 'eslint compilation-error-regexp-alist-alist)) (cdr form))
-      (push form compilation-error-regexp-alist-alist)))
-  (push 'eslint compilation-error-regexp-alist)
-
-
-
-  (add-to-list 'compilation-error-regexp-alist '("^[[:blank:]]*\\([/_-\\.[:alnum:]]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\) - error.*$" 1 2 3))
-  ;; React
-  (add-to-list 'compilation-error-regexp-alist '("[[:blank:]]*\\([/_\\.[:alnum:]-]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\) - error.*$" 1 2 3))
-  ;; Angular
-  (add-to-list 'compilation-error-regexp-alist '("^Error: \\([_[:alnum:]-/.]*\\):\\([0-9]+\\):\\([0-9]+\\)" 1 2 3)))
-
-
-(yas-global-mode 1)
-(add-hook 'python-mode-hook #'yas-minor-mode)
-
-
-;; Налаштування "company" для роботи з Python
-(after! python
-  (setq company-backends '(company-jedi company-files company-yasnippet)))
-
-;; Активувати company-mode
-(add-hook 'python-mode-hook 'company-mode)
-
-;; Почати автозаповнення вручну (наприклад, використовуючи TAB)
-(after! company
-  (define-key company-active-map (kbd "TAB") #'company-indent-or-complete-common))
-
-
-
-(after! company
-  ;; Зменшити мінімальну довжину префіксу перед показом варіантів автозаповнення
-  (setq company-minimum-prefix-length 2)
-
-  ;; Затримка перед початком автоматичного пошуку автозаповнення
-  (setq company-idle-delay 0.2)
-
-  ;; Увімкнути підтримку циклічного вибору варіантів автозаповнення
-  (setq company-selection-wrap-around t)
-
-  ;; Вимкнути обов'язкову відповідність вхідних символів
-  (setq company-require-match nil))
-
-;; Увімкнути company-mode в режимі Python
-(add-hook 'python-mode-hook 'company-mode)
-
-;; Встановити значок для відображення режиму company в строку стану
-(after! company
-  (setq company-lighter-base "C"))
-
-;; Налаштувати символи, які запускають автозаповнення
-(after! company
-  (setq company-insertion-on-trigger t))
-
-;; Вказати символи, які запускають автозаповнення
-(after! company
-  (setq company-insertion-triggers ".,;:"))
-
-(after! company
-  (company-quickhelp-mode 1))
-
-
-(defun my-company-completion-started-function (arg)
-  (message "Автозаповнення розпочалося")
-  ;; Додатковий код, якщо потрібно
-)
-
-(defun my-company-completion-cancelled-function (arg)
-  (message "Автозаповнення скасовано")
-  ;; Додатковий код, якщо потрібно
-)
-
-(defun my-company-completion-finished-function (arg)
-  (message "Автозаповнення завершено")
-  ;; Додатковий код, якщо потрібно
-)
-
-(defun my-company-after-completion-function (arg)
-  (message "Після автозаповнення")
-  ;; Додатковий код, якщо потрібно
-)
-
-(require 'company)
-(require 'company-jedi)
-
-
-(setq company-backends '(company-capf company-files company-yasnippet))
-(setq company-backends '(company-capf company-files company-yasnippet))
-(setq company-backends '(company-capf company-files company-ispell))
-
-(use-package company-box
-  :hook (company-mode . company-box-mode)
-  :config
-  (setq company-box-icons-alist 'company-box-icons-all-the-icons)
-  (setq company-box-backends-colors nil) ; Вимкнути кольори для backends
-  (add-to-list 'company-box-icons-functions
-               '(lambda (candidate)
-                  (when (and (derived-mode-p 'python-mode)
-                             (or (string= (substring candidate 0 1) "__")
-                                 (string= (substring candidate 0 1) "_")))
-                    '("" . nil)))) ; Замініть на іконку Python, якщо це ім'я змінної/функції
-  )
-
-(add-hook 'python-mode-hook 'company-box-mode)
-
-
-
-(defun my/python-mode-hook ()
-  ;; Додаємо 'company-jedi' до списку backends для company-mode
-  (add-to-list 'company-backends 'company-jedi))
-
-(add-hook 'python-mode-hook 'my/python-mode-hook)
-
-
-(use-package lsp-python-ms
+              ("SPC d n" . dap-next)
+              ("SPC d i" . dap-step-in)
+              ("SPC d o" . dap-step-out)
+              ("SPC d c" . dap-continue)
+              ("SPC d Q" . dap-disconnect)
+              ("SPC d q" . dap-disconnect)
+              ("SPC d d" . (lambda () (interactive)
+                             (call-interactively #'dap-debug)
+                             (set-window-buffer nil (current-buffer))))
+              ("SPC d r" . dap-debug-recent)
+              ("SPC d l" . dap-ui-locals)
+              ("SPC d b" . dap-ui-breakpoints)
+              ("SPC d s" . dap-ui-sessions)
+              ("SPC d e" . dap-debug-last)
+              ("SPC d p" . (lambda () (interactive)
+                             (set-window-buffer nil (current-buffer))
+                             (dap-breakpoint-toggle)))
+              ("SPC d e" . dap-debug-edit-template))
   :init
-  (setq lsp-python-ms-auto-install-server t) ; Автоматично встановлює сервер
-  :hook (python-mode . lsp))
+  (dap-mode 1)
+  (dap-ui-controls-mode 1)  ; Відображення панелі з кнопками відлагодження
+  (setq dap-auto-configure-features '(sessions locals)))
 
+;;KEYS
 
-(use-package company-lsp
-  :config
-  (push 'company-lsp company-backends))
+(global-set-key (kbd "C-c C-x") 'run-python)
 
-;; Налаштування company-lsp
-(setq company-lsp-cache-candidates 'auto
-      company-lsp-async t
-      company-lsp-enable-snippet t
-      company-lsp-enable-recompletion t)
-
-
-
-(use-package! floobits
-  :defer t)
-
-(use-package! elisp-mode
-  :defer t
-  :hook ((emacs-lisp-mode . paren-face-mode)
-         (emacs-lisp-mode . rainbow-delimiters-mode-disable))
-
-  :bind (("C-c o" . outline-cycle)
-         ("C-c r" . outline-show-all)
-         ("C-c m" . outline-hide-body)
-         ("C-c ]" . outline-next-heading)
-         ("C-c [" . outline-previous-heading)
-         ("C-c c" . counsel-outline)
-         ("C-c e" . outline-hide-entry)
-         ("C-c t" . outline-toggle-children)
-         ("C-c b" . outline-cycle-buffer))
-  :config
-  (setq rainbow-delimiters-mode -1))
-
-(use-package! package-build
-  :defer t)
-
-(use-package! package-lint
-  :defer t)
-
-(setenv "TSSERVER_LOG_FILE" "/tmp/tsserver.log")
-(use-package! typescript-mode
-  :defer 10
-  :config
-  (setq typescript-indent-level 2)
-  (add-to-list 'auto-mode-alist '("\.ts\'" . typescript-mode)))
-
-(use-package! ng2-mode
-  :after typescript-mode
-  :hook (ng2-html-mode . web-mode)
-  :config
-  ;; (add-to-list 'lsp-disabled-clients 'deno-ls)
-  (setq lsp-clients-angular-language-server-command
-        '("/opt/homebrew/opt/node@14/bin/node"
-          "/opt/homebrew/lib/node_modules/@angular/language-server"
-          "--ngProbeLocations"
-          "/opt/homebrew/lib/node_modules"
-          ;; "/usr/local/lib/node_modules"
-          "--tsProbeLocations"
-          ;; "/usr/local/lib/node_modules"
-          "/opt/homebrew/lib/node_modules"
-          "--stdio")))
-
-(use-package! js2-mode
-  :defer t
-  :hook (js2-mode . js2-highlight-unused-variables-mode))
-
-(use-package! nodejs-repl
-  :defer t)
-
-(use-package! npm
-  :defer t)
-
-(after! python
-  ;; Встановити відступи на 4 пробіли
-  (setq python-indent-offset 4)
-
-  ;; Використовувати пробіли для відображення відступів
-  (setq python-indent-guess-indent-offset-verbose nil)
-  (setq python-indent-guess-indent-offset nil)
-  
-  ;; Вимкнути авто-вирівнювання за допомогою Tab
-  (setq python-indent-guess-indent-offset-verbose nil)
-  (setq python-indent-guess-indent-offset nil)
-  
-  ;; Встановити максимальну довжину рядка на 79 символів
-  (setq fill-column 79)
-  
-  ;; Включити автоматичне вирівнювання
-  (setq python-auto-indent t))
-
-(use-package! python
-  :config
-  (setq python-shell-interpreter "python"
-        python-shell-interpreter-args "-m IPython --simple-prompt -i")
-  (setq python-shell-virtualenv-root "/Users/macos/.local/share/virtualenvs/myenv"))
-
-(pyvenv-mode 1)
-(pyvenv-tracking-mode 1)
-
-(map! :leader
-      (:prefix ("t" . "tests")
-        :desc "Run pytest" "t" #'python-pytest-dispatch))
-
-(map! :leader
-      (:prefix ("i" . "interpreter")
-        :desc "Run Python" "i" #'python-shell-switch-to-shell))
-
-(after! company
-  (setq company-idle-delay 0.2)
-  (setq company-minimum-prefix-length 2))
-
-(after! flycheck
-  (setq flycheck-python-pylint-executable "pylint")
-  (setq flycheck-python-pyright-executable nil)
-  (flycheck-add-next-checker 'python-flake8 'python-pylint))
-
-
-(setq lsp-pyright-multi-root nil)
-(use-package! lsp-pyright
-  :defer t
-  :config
-  (setq lsp-pyright-auto-import-completions t)
-  (setq lsp-pyright-auto-search-paths t)
-  (setq lsp-pyright-log-level "trace")
-  (setq lsp-pyright-multi-root nil)
-  (setq lsp-pyright-use-library-code-for-types t)
-  (setq lsp-pyright-venv-directory "/Users/macos/.local/share/virtualenvs/myenv")
-  (setq lsp-pyright-diagnostic-mode "workspace"))
-
-(use-package! lsp-volar
-  :after lsp-mode)
-
-
-
-(use-package! lsp-dart
-  :defer t
-  :hook (dart-mode . (lambda () (interactive)
-                       (add-hook 'after-save-hook
-                                 (lambda ()
-                                   ;; (flutter-run-or-hot-reload)
-                                   (flutter-hot-restart)
-                                   (message "flutter restarted")
-                                   )
-                                 t t)))
-  :custom
-  (lsp-dart-dap-flutter-hot-reload-on-save t)
-  :config
-  (defun lsp-dart-flutter-widget-guide--add-overlay-to (buffer line col string)
-    "Add to BUFFER at LINE and COL a STRING overlay."
-    (save-excursion
-      (goto-char (point-min))
-      (forward-line line)
-      (move-to-column col)
-      (when (string= lsp-dart-flutter-widget-guide-space (string (following-char)))
-        (let ((ov (make-overlay (point) (1+ (point)) buffer)))
-          (overlay-put ov 'category 'lsp-dart-flutter-widget-guide)
-          (overlay-put ov 'display (propertize string
-                                               'face 'custom-comment-tag)))))))
-
-
-
-
-
-(use-package! web-mode
-  :defer t
-  :mode (("\\.vue\\'" . web-mode)
-         ("\\.tsx\\'" . typescript-tsx-mode)
-         ("\\.jsx\\'" . web-mode))
-  :config
-  (setq web-mode-enable-auto-quoting nil)
-  (setq web-mode-comment-formats
-        '(("java"       . "/*")
-          ("javascript" . "//")
-          ("typescript" . "//")
-          ("vue"        . "//")
-          ("php"        . "/*")
-          ("pug"        . "//")
-          ("css"        . "/*")))
-  ;; Crutch for tsx mode
-  ;; (setq font-lock-defaults '('(web-mode-fontify) t))
-  ;; (setq tree-sitter-hl-use-font-lock-keywords nil)
-  ;; ---------------------------END CRUTCH HERE -------------------------------------
-  (setq web-mode-code-indent-offset 2)
-  (setq web-mode-css-indent-offset 2))
-
-(use-package! pug-mode
-  :defer t)
-
-(use-package! emmet-mode
-  :hook ((scss-mode . emmet-mode) (css-mode . emmet-mode) (ng2-html-mode . emmet-mode) (html-mode . emmet-mode))
-  :defer 5)
-
-(use-package! css-mode
-  :defer t
-  :config
-  (defun revert-buffer-no-confirm ()
-    "Revert buffer without confirmation."
-    (interactive)
-    (revert-buffer :ignore-auto :noconfirm))
-
-  (defun run-sass-auto-fix ()
-    "Run sass auto fix if cli tool exist"
-    (interactive)
-    (save-window-excursion
-      (let ((default-directory (file-name-directory buffer-file-name)))
-        (async-shell-command "sass-lint-auto-fix")
-        ;; (revert-buffer-no-confirm)
-        (message "SASS FORMATTED"))))
-  ;; (add-hook 'scss-mode-hook '(lambda () (add-hook 'after-save-hook #'run-sass-auto-fix t t)))
-  (add-hook 'scss-mode-hook #'(lambda () (add-hook 'before-save-hook #'format-all-buffer nil t))))
-
-(use-package! json-mode
-  :defer t
-  :hook (json-mode . format-all-mode))
-
-(use-package! docker-compose-mode
-  :defer t)
-
-(use-package! dockerfile-mode
-  :defer t
-  :config
-  (add-hook 'compilation-filter-hook #'my-remove-cr -90))
-
-(use-package! jenkinsfile-mode
-  :defer t
-  :config)
-
-(use-package! kubernetes
-  :defer 6
-  :commands (kubernetes-overview)
-  :bind (:map evil-normal-state-map
-              ("SPC o K" . kubernetes-overview))
-  :config
-  (setq kubernetes-poll-frequency 3600
-        kubernetes-redraw-frequency 3600))
-
-(use-package! k8s-mode
-  :defer t)
-
-(use-package! kubernetes-evil
-  :after kubernetes)
-
-(use-package! nginx-mode
-  :defer t)
-
-(use-package! jinja2-mode
-  :defer t)
+;;MARKDOWN
 
 (use-package! grip-mode
   :after markdown-mode
@@ -1144,10 +668,14 @@ Version 2015-12-08"
     (setq grip-github-user (car credential)
           grip-github-password (cadr credential))))
 
+;;MAGIT
+
 (use-package! magit
   :defer t
   :bind (:map magit-mode-map
-         ("s-<return>" . magit-diff-visit-worktree-file))
+         ("s-<return>" . magit-diff-visit-worktree-file)
+         :map evil-normal-state-map
+         ("SPC g i" . (lambda () (interactive) (wakatime-ui--clear-modeline) (magit-status))))
   :hook
   (magit-process-mode . compilation-minor-mode)
   :config
@@ -1164,6 +692,7 @@ Version 2015-12-08"
    #'my-remove-cr)
   (setq magit-process-finish-apply-ansi-colors t))
 
+;;GITHUB GIST
 (use-package! gist                       ;
   :defer t
   :bind (:map gist-list-menu-mode-map
@@ -1176,310 +705,316 @@ Version 2015-12-08"
          :map evil-normal-state-map
          ("SPC g l g" . gist-list)))
 
-(use-package! forge
-  :after magit
-  :config
-  (setq auth-sources '("~/.authinfo"))
-  (setq forge-alist
-        `(("github.com"
-           "api.github.com"
-           ,nil
-           ,nil
-           "AndriiDorohov"
-           ,nil
-           ,nil))))
+;;CODE REVIEW
 
+(use-package! code-review
+  :defer t
+  :config
+  (setq code-review-new-buffer-window-strategy #'switch-to-buffer))
+
+;;GIT GUTTER
 
 (after! git-gutter
   (global-set-key (kbd "C-x p") 'git-gutter:previous-hunk)
   (global-set-key (kbd "C-x n") 'git-gutter:next-hunk))
 
-
-(use-package! elfeed
-  :defer 30
-  :config
-  (add-hook! 'elfeed-search-mode-hook 'elfeed-update)
-  (setq-default elfeed-search-filter "@12-hours-ago +unread")
-  (setq-default elfeed-search-title-max-width 100)
-  (setq-default elfeed-search-title-min-width 100)
-  (setq browse-url-browser-function #'browse-url-default-browser))
-
-(use-package! elfeed-score
-  :after elfeed
-  :config
-  (setq elfeed-score-score-file "~/.doom.d/elfeed.score")
-  (progn
-    (elfeed-score-enable)
-    (define-key elfeed-search-mode-map "=" elfeed-score-map)))
-
-(use-package! pocket-reader
-  :defer t)
-
-(use-package! pdf-view
-  :defer t
-  :hook (pdf-view-mode . pdf-view-themed-minor-mode))
-
-(use-package! prg-crypt
-  :defer t)
-
-(use-package! org
-  :mode (("\\.org$" . org-mode))
-  :defer t
-  ;; :demand t
-  :bind (:map evil-normal-state-map
-              ("SPC h ]" . org-next-visible-heading)
-              ("SPC h [" . org-previous-visible-heading))
-  :config
-  (progn
-    (define-key org-mode-map "\C-x a f" "\C-x h \C-M-\\ \C-c")
-    (custom-set-faces
-     '(org-document-title ((t (:inherit outline-1 :height 2.5))))
-     '(org-level-1 ((t (:inherit outline-1 :height 2.0))))
-     '(org-level-2 ((t (:inherit outline-2 :height 1.5))))
-     '(org-level-3 ((t (:inherit outline-3 :height 1.25))))
-     '(org-level-4 ((t (:inherit outline-4 :height 1.1))))
-     '(org-level-5 ((t (:inherit outline-5 :height 1.0)))))
-
-    (setq org-hide-emphasis-markers t)
-
-    (add-to-list 'org-tag-faces '("@.*" . (:foreground "red")))
-
-    ;; Increase priorities count
-    (setq org-highest-priority ?A
-          org-default-priority ?C
-          org-lowest-priority ?E)
+(after! git-gutter-fringe
+  (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
 
 
-    (defun publish-org-blog()
-      "Publish this note to du-blog!"
-      (interactive)
-      (require 'ox-gfm)
-      (setq org-export-with-sub-superscripts '{})
-      (defun org-gfm-format-toc (headline) "")
-      (org-gfm-export-to-markdown)
-      (let ((file-path (replace-regexp-in-string " " "\\\\\  " (buffer-file-name))))
+;;TABS
 
-        (message (concat
-                  "node /Users/darkawower/projects/pet/it-blog/emacs-blog/index.js"
-                  file-path))
-        (shell-command
-         (concat
-          "node /Users/darkawower/projects/pet/it-blog/emacs-blog/index.js "
-          file-path))))
-
-    (setenv "NODE_PATH"
-            (concat
-             (getenv "HOME") "/org-node/node_modules"  ":"
-             (getenv "NODE_PATH")))
-
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((typescript . t)
-       (js . t)
-       (restclient . t)))
-
-    (defun org-babel-execute:typescript (body params)
-      (let ((org-babel-js-cmd "npx ts-node < "))
-        (org-babel-execute:js body params)))
-
-    (defvar org-babel-js-function-wrapper
-      ""
-      "Javascript code to print value of body.")
-;; Applications for opening from org files
-(if (assoc "\\.pdf\\'" org-file-apps)
-         (setcdr (assoc "\\.pdf\\'" org-file-apps) 'emacs)
-       (add-to-list 'org-file-apps '("\\.pdf\\'" . emacs) t))))
-
-
-
-(use-package! svg-tag-mode
-  :defer t
-  :hook (org-mode . svg-tag-mode)
-  :config
-  (setq svg-tag-tags
-        '(("\\(:[A-Z]+:\\)" . ((lambda (tag)
-                                 (svg-tag-make tag :beg 1 :end -1)))))))
-
-(after! org
-  (setq org-todo-keywords
-        '((sequence
-           "TODO(t)"     ; A task that needs doing & is ready to do
-           "PROJ(p)"     ; A project, which usually contains other tasks
-           "IDEA(i)"     ; Idea
-           "PROGRESS(s)" ; A task that is in progress
-           "WAIT(w)"     ; Something external is holding up this task
-           "TEST(c)"     ; In TEST statement
-           "BLOCK(b)"    ; task blocked
-           "REJECTED(x)" ; somebody rejected idea :(
-           "FEEDBACK(f)" ; Feedback required
-           "REVIEW(r)"   ; Somebody reviewed your feature
-           "HOLD(h)"     ; This task is paused/on hold because of me
-           "|"
-           "DONE(d)"     ; Task successfully completed
-           "KILL(k)")    ; Task was cancelled, aborted or is no longer applicable
-          (sequence
-           "[ ](T)"      ; A task that needs doing
-           "[-](S)"      ; Task is in progress
-           "[?](W)"      ; Task is being held up or paused
-           "|"
-           "[X](D)"))    ; Task was completed
-        org-todo-keyword-faces
-        '(("[-]"        . +org-todo-active)
-          ("PROGRESS"   . org-todo)
-          ("DONE"       . org-todo)
-          ("IDEA"       . org-todo)
-          ("[?]"        . +org-todo-onhold)
-          ("WAIT"       . +org-todo-onhold)
-          ("TEST"       . +org-todo-active)
-          ("FEEDBACK"   . +org-todo-onhold)
-          ("REVIEW"     . +org-todo-onhold)
-          ("HOLD"       . +org-todo-onhold)
-          ("PROJ"       . +org-todo-project)
-          ("BLOCK"       . +org-todo-cancel)
-          ("REJECTED"       . +org-todo-cancel)
-          ("KILL"       . +org-todo-cancel))))
-
-(add-hook 'org-mode-hook (lambda ()
-                           "Beautify Org Checkbox Symbol"
-                           (push '("[ ]" .  "☐") prettify-symbols-alist)
-                           (push '("[X]" . "☑" ) prettify-symbols-alist)
-                           (push '("[-]" . "❍" ) prettify-symbols-alist)
-                           (push '("#+BEGIN_SRC" . "↦" ) prettify-symbols-alist)
-                           (push '("#+END_SRC" . "⇤" ) prettify-symbols-alist)
-                           (push '("#+BEGIN_EXAMPLE" . "↦" ) prettify-symbols-alist)
-                           (push '("#+END_EXAMPLE" . "⇤" ) prettify-symbols-alist)
-                           (push '("#+BEGIN_QUOTE" . "↦" ) prettify-symbols-alist)
-                           (push '("#+END_QUOTE" . "⇤" ) prettify-symbols-alist)
-                           (push '("#+begin_quote" . "↦" ) prettify-symbols-alist)
-                           (push '("#+end_quote" . "⇤" ) prettify-symbols-alist)
-                           (push '("#+begin_example" . "↦" ) prettify-symbols-alist)
-                           (push '("#+end_example" . "⇤" ) prettify-symbols-alist)
-                           (push '("#+begin_src" . "↦" ) prettify-symbols-alist)
-                           (push '("#+end_src" . "⇤" ) prettify-symbols-alist)
-                           (push '("#+TITLE:" . "") prettify-symbols-alist)
-                           (push '("#+DESCRIPTION:" . "") prettify-symbols-alist)
-                           (push '("#+ID:" . "") prettify-symbols-alist)
-                           (push '("#+FILETAGS:" . "") prettify-symbols-alist)
-                           (push '("#+STARTUP:" . "") prettify-symbols-alist)
-                           (push '("#+ACTIVE:" . "") prettify-symbols-alist)
-                           (push '("#+START_SPOILER" . "") prettify-symbols-alist)
-                           (push '("#+CLOSE_SPOILER" . "") prettify-symbols-alist)
-                           (push '("#+BEGIN_HIDDEN" . "") prettify-symbols-alist)
-                           (push '("#+END_HIDDEN" . "") prettify-symbols-alist)
-                           (prettify-symbols-mode)))
-
-(use-package! org-fancy-priorities
-  :after org
-  :hook (org-mode . org-fancy-priorities-mode)
-  :config
-  (setq org-fancy-priorities-list '((?A . "🔥")
-                                    (?B . "⬆")
-                                    (?C . "❗")
-                                    (?D . "⬇")
-                                    (?E . "❓")
-                                    (?1 . "🔥")
-                                    (?2 . "⚡")
-                                    (?3 . "⮮")
-                                    (?4 . "☕")
-                                    (?I . "Important"))))
-
-(use-package! org-indent
-  :defer 8
+(use-package centaur-tabs
   :init
-  (add-hook 'org-mode-hook 'org-indent-mode))
-
-(use-package! org-superstar
-  :defer 5
-  :hook (org-mode . org-superstar-mode)
+  (setq centaur-tabs-enable-key-bindings t)
   :config
-  (setq org-directory "~/Desktop/EMACS_ORG")
-  (setq org-agenda-files (append (directory-files-recursively "~/Desktop/EMACS_ORG" "\\.org$"))))
+  (setq centaur-tabs-style "slant"
+        centaur-tabs-height 32
+        centaur-tabs-set-icons t
+        centaur-tabs-show-new-tab-button t
+        centaur-tabs-set-modified-marker t
+        centaur-tabs-show-navigation-buttons t
+        centaur-tabs-set-bar 'under
+        centaur-tabs-show-count nil
+        ;; centaur-tabs-label-fixed-length 15
+        ;; centaur-tabs-gray-out-icons 'buffer
+        ;; centaur-tabs-plain-icons t
+        x-underline-at-descent-line t
+        centaur-tabs-left-edge-margin nil)
+  (centaur-tabs-change-fonts (face-attribute 'default :font) 110)
+  (centaur-tabs-headline-match)
+  ;; (centaur-tabs-enable-buffer-alphabetical-reordering)
+  ;; (setq centaur-tabs-adjust-buffer-order t)
+  (centaur-tabs-mode t)
+  (setq uniquify-separator "/")
+  (setq uniquify-buffer-name-style 'forward)
+  (defun centaur-tabs-buffer-groups ()
+    "`centaur-tabs-buffer-groups' control buffers' group rules.
 
-(use-package! org-roam
-  :after org
-  :bind (:map evil-normal-state-map
-               ("SPC n r i" . org-roam-node-insert))
+Group centaur-tabs with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
+All buffer name start with * will group to \"Emacs\".
+Other buffer group by `centaur-tabs-get-group-name' with project name."
+    (list
+     (cond
+      ;; ((not (eq (file-remote-p (buffer-file-name)) nil))
+      ;; "Remote")
+      ((or (string-equal "*" (substring (buffer-name) 0 1))
+           (memq major-mode '(magit-process-mode
+                              magit-status-mode
+                              magit-diff-mode
+                              magit-log-mode
+                              magit-file-mode
+                              magit-blob-mode
+                              magit-blame-mode
+                              )))
+       "Emacs")
+      ((derived-mode-p 'prog-mode)
+       "Editing")
+      ((derived-mode-p 'dired-mode)
+       "Dired")
+      ((memq major-mode '(helpful-mode
+                          help-mode))
+       "Help")
+      ((memq major-mode '(org-mode
+                          org-agenda-clockreport-mode
+                          org-src-mode
+                          org-agenda-mode
+                          org-beamer-mode
+                          org-indent-mode
+                          org-bullets-mode
+                          org-cdlatex-mode
+                          org-agenda-log-mode
+                          diary-mode))
+       "OrgMode")
+      (t
+       (centaur-tabs-get-group-name (current-buffer))))))
+  :hook
+  (dashboard-mode . centaur-tabs-local-mode)
+  (term-mode . centaur-tabs-local-mode)
+  (calendar-mode . centaur-tabs-local-mode)
+  (org-agenda-mode . centaur-tabs-local-mode)
+  :bind
+  ("C-<prior>" . centaur-tabs-backward)
+  ("C-<next>" . centaur-tabs-forward)
+  ("C-S-<prior>" . centaur-tabs-move-current-tab-to-left)
+  ("C-S-<next>" . centaur-tabs-move-current-tab-to-right)
+  (:map evil-normal-state-map
+        ("g t" . centaur-tabs-forward)
+        ("g T" . centaur-tabs-backward)))
+
+;;VERTICO
+
+(use-package marginalia
+  :general
+  (:keymaps 'minibuffer-local-map
+   "M-A" 'marginalia-cycle)
+  :custom
+  (marginalia-max-relative-age 0)
+  (marginalia-align 'right)
   :init
-  (setq org-roam-v2-ack t)
+  (marginalia-mode))
+
+(use-package all-the-icons-completion
+  :after (marginalia all-the-icons)
+  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+  :init
+  (all-the-icons-completion-mode))
+
+(use-package vertico
+  :demand t                             ; Otherwise won't get loaded immediately
+  :general
+  (:keymaps '(normal insert visual motion)
+   "M-." #'vertico-repeat
+   )
+  (:keymaps 'vertico-map
+   "<tab>" #'vertico-insert ; Set manually otherwise setting `vertico-quick-insert' overrides this
+   "<escape>" #'minibuffer-keyboard-quit
+   "?" #'minibuffer-completion-help
+   "C-M-n" #'vertico-next-group
+   "C-M-p" #'vertico-previous-group
+   ;; Multiform toggles
+   "<backspace>" #'vertico-directory-delete-char
+   "C-w" #'vertico-directory-delete-word
+   "C-<backspace>" #'vertico-directory-delete-word
+   "RET" #'vertico-directory-enter
+   "C-i" #'vertico-quick-insert
+   "C-o" #'vertico-quick-exit
+   "M-o" #'kb/vertico-quick-embark
+   "M-G" #'vertico-multiform-grid
+   "M-F" #'vertico-multiform-flat
+   "M-R" #'vertico-multiform-reverse
+   "M-U" #'vertico-multiform-unobtrusive
+   "C-l" #'kb/vertico-multiform-flat-toggle
+   )
+  :hook ((rfn-eshadow-update-overlay . vertico-directory-tidy) ; Clean up file path when typing
+         (minibuffer-setup . vertico-repeat-save) ; Make sure vertico state is saved
+         )
+  :custom
+  (vertico-count 13)
+  (vertico-resize t)
+  (vertico-cycle nil)
+  ;; Extensions
+  (vertico-grid-separator "       ")
+  (vertico-grid-lookahead 50)
+  (vertico-buffer-display-action '(display-buffer-reuse-window))
+  (vertico-multiform-categories
+   '((file reverse)
+     (consult-grep buffer)
+     (consult-location)
+     (imenu buffer)
+     (library reverse indexed)
+     (org-roam-node reverse indexed)
+     (t reverse)
+     ))
+  (vertico-multiform-commands
+   '(("flyspell-correct-*" grid reverse)
+     (org-refile grid reverse indexed)
+     (consult-yank-pop indexed)
+     (consult-flycheck)
+     (consult-lsp-diagnostics)
+     ))
+  :init
+  (defun kb/vertico-multiform-flat-toggle ()
+    "Toggle between flat and reverse."
+    (interactive)
+    (vertico-multiform--display-toggle 'vertico-flat-mode)
+    (if vertico-flat-mode
+        (vertico-multiform--temporary-mode 'vertico-reverse-mode -1)
+      (vertico-multiform--temporary-mode 'vertico-reverse-mode 1)))
+  (defun kb/vertico-quick-embark (&optional arg)
+    "Embark on candidate using quick keys."
+    (interactive)
+    (when (vertico-quick-jump)
+      (embark-act arg)))
+
+  ;; Workaround for problem with `tramp' hostname completions. This overrides
+  ;; the completion style specifically for remote files! See
+  ;; https://github.com/minad/vertico#tramp-hostname-completion
+  (defun kb/basic-remote-try-completion (string table pred point)
+    (and (vertico--remote-p string)
+         (completion-basic-try-completion string table pred point)))
+  (defun kb/basic-remote-all-completions (string table pred point)
+    (and (vertico--remote-p string)
+         (completion-basic-all-completions string table pred point)))
+  (add-to-list 'completion-styles-alist
+               '(basic-remote           ; Name of `completion-style'
+                 kb/basic-remote-try-completion kb/basic-remote-all-completions nil))
   :config
-  ;; (org-roam-db-autosync-enable)
-  (cl-lib-defmethod org-roam-node-mtitle ((node org-roam-node))
-    "Return customized title of roam node"
-    (let* ((tags (org-roam-node-tags node))
-           (title (org-roam-node-title node)))
-      (if (not tags)
-          title
-        (setq joined-text (string-join tags ", "))
-        (concat (propertize (format "(%s) " joined-text) 'face `(:foreground ,+m-color-main :weight bold :slant italic)) title))))
-  ;; (setq org-roam-completion-system 'ivy)
-  (setq org-roam-completion-system 'vertico)
-  (setq org-roam-node-display-template "${mtitle:100}")
-  (setq org-roam-directory (file-truename "~/org-roam")))
+  (vertico-mode)
+  ;; Extensions
+  (vertico-multiform-mode)
+
+  ;; Prefix the current candidate with “» ”. From
+  ;; https://github.com/minad/vertico/wiki#prefix-current-candidate-with-arrow
+  (advice-add #'vertico--format-candidate :around
+                                          (lambda (orig cand prefix suffix index _start)
+                                            (setq cand (funcall orig cand prefix suffix index _start))
+                                            (concat
+                                             (if (= vertico--index index)
+                                                 (propertize "» " 'face 'vertico-current)
+                                               "  ")
+                                             cand)))
+  )
 
 
-(use-package! websocket
-  :after org-roam)
+(use-package orderless
+  :custom
+  (completion-styles '(orderless))
+  (completion-category-defaults nil)    ; I want to be in control!
+  (completion-category-overrides
+   '((file (styles basic-remote ; For `tramp' hostname completion with `vertico'
+                   orderless
+                   ))
+     ))
 
-(use-package! org-roam-ui
-  :after org-roam
-  :config
-  (setq org-roam-ui-sync-theme t
-        org-roam-ui-follow t
-        org-roam-ui-update-on-save t
-        org-roam-ui-open-on-start t
-        org-roam-ui-browser-function #'xwidget-webkit-browse-url))
+  (orderless-component-separator 'orderless-escapable-split-on-space)
+  (orderless-matching-styles
+   '(orderless-literal
+     orderless-prefixes
+     orderless-initialism
+     orderless-regexp
+     ;; orderless-flex
+     ;; orderless-strict-leading-initialism
+     ;; orderless-strict-initialism
+     ;; orderless-strict-full-initialism
+     ;; orderless-without-literal          ; Recommended for dispatches instead
+     ))
+  (orderless-style-dispatchers
+   '(prot-orderless-literal-dispatcher
+     prot-orderless-strict-initialism-dispatcher
+     prot-orderless-flex-dispatcher
+     ))
+  :init
+  (defun orderless--strict-*-initialism (component &optional anchored)
+    "Match a COMPONENT as a strict initialism, optionally ANCHORED.
+The characters in COMPONENT must occur in the candidate in that
+order at the beginning of subsequent words comprised of letters.
+Only non-letters can be in between the words that start with the
+initials.
 
-(use-package! org-yt
-  :defer 20
-  :config
-  (defun org-image-link (protocol link _description)
-    "Interpret LINK as base64-encoded image data."
-    (cl-lib-assert (string-match "\\`img" protocol) nil
-               "Expected protocol type starting with img")
-    (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
-      (cl-lib-assert buf nil
-                 "Download of image \"%s\" failed." link)
-      (with-current-buffer buf
-        (goto-char (point-min))
-        (re-search-forward "\r?\n\r?\n")
-        (buffer-substring-no-properties (point) (point-max)))))
+If ANCHORED is `start' require that the first initial appear in
+the first word of the candidate.  If ANCHORED is `both' require
+that the first and last initials appear in the first and last
+words of the candidate, respectively."
+    (orderless--separated-by
+        '(seq (zero-or-more alpha) word-end (zero-or-more (not alpha)))
+      (cl-loop for char across component collect `(seq word-start ,char))
+      (when anchored '(seq (group buffer-start) (zero-or-more (not alpha))))
+      (when (eq anchored 'both)
+        '(seq (zero-or-more alpha) word-end (zero-or-more (not alpha)) eol))))
 
-  (org-link-set-parameters
-   "imghttp"
-   :image-data-fun #'org-image-link)
+  (defun orderless-strict-initialism (component)
+    "Match a COMPONENT as a strict initialism.
+This means the characters in COMPONENT must occur in the
+candidate in that order at the beginning of subsequent words
+comprised of letters.  Only non-letters can be in between the
+words that start with the initials."
+    (orderless--strict-*-initialism component))
 
-  (org-link-set-parameters
-   "imghttps"
-   :image-data-fun #'org-image-link))
+  (defun prot-orderless-literal-dispatcher (pattern _index _total)
+    "Literal style dispatcher using the equals sign as a suffix.
+It matches PATTERN _INDEX and _TOTAL according to how Orderless
+parses its input."
+    (when (string-suffix-p "=" pattern)
+      `(orderless-literal . ,(substring pattern 0 -1))))
 
-(use-package! web-roam
-  :defer t
-  :bind (:map evil-normal-state-map
-              ("SPC n p" . web-roam-publish-file)))
+  (defun prot-orderless-strict-initialism-dispatcher (pattern _index _total)
+    "Leading initialism  dispatcher using the comma suffix.
+It matches PATTERN _INDEX and _TOTAL according to how Orderless
+parses its input."
+    (when (string-suffix-p "," pattern)
+      `(orderless-strict-initialism . ,(substring pattern 0 -1))))
 
-(use-package! ob-async
-  :defer t
-  :config
-  (setq ob-async-no-async-languages-alist '("ipython")))
+  (defun prot-orderless-flex-dispatcher (pattern _index _total)
+    "Flex  dispatcher using the tilde suffix.
+It matches PATTERN _INDEX and _TOTAL according to how Orderless
+parses its input."
+    (when (string-suffix-p "." pattern)
+      `(orderless-flex . ,(substring pattern 0 -1))))
+  )
 
-(use-package! restclient
-  :defer t)
+;;INDENT
+(use-package highlight-indent-guides)
+(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+(setq highlight-indent-guides-method 'character)
 
-(use-package! ob-restclient
-  :defer 8)
+(defun my-highlighter (level responsive display)
+  (if (> 1 level)
+      nil
+    (highlight-indent-guides--highlighter-default level responsive display)))
 
-;; Вимкнути глобальну нумерацію рядків
-(global-display-line-numbers-mode 0)
+(setq highlight-indent-guides-highlighter-function 'my-highlighter)
 
-;; Включити нумерацію рядків тільки для режимів python, js, html та json
-(dolist (mode '(python-mode js-mode html-mode json-mode))
-  (add-hook (intern (concat (symbol-name mode) "-hook"))
-            (lambda () (display-line-numbers-mode 1))))
+;;MULTITERMINAL
+(use-package aweshell)
 
+(setq eshell-up-ignore-case t)
+(setq eshell-up-print-parent-dir t)
+(setq exec-path-from-shell-check-startup-files nil)
 
-;; (use-package! pretty-agenda
-;;  :load-path "~/.doom.d/"
-;;  :defer 15)
-
-
-
+(with-eval-after-load "esh-opt"
+  (autoload 'epe-theme-lambda "eshell-prompt-extras")
+  (setq eshell-highlight-prompt nil
+        eshell-prompt-function 'epe-theme-lambda))

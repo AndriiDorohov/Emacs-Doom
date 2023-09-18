@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: org src typescript
-# key: +t
-# --
-
-#+BEGIN_SRC typescript
-$0
-#+END_SRC

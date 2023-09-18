@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: rxjs import
-# key: a-rxjs-import
-# group: rxjs
-# --
-import { ${1:Observable} } from 'rxjs';
-$0

@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: git ignore mac os
-# key: .gm
-# --
-
-# Mac os
-.DS_Store
-.AppleDouble
-.LSOverride

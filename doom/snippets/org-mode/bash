@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: bash
-# key: +b
-# --
-
-#+BEGIN_SRC bash :async :results output
-$1
-#+END_SRC
