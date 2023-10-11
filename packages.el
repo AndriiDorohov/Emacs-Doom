@@ -48,44 +48,132 @@
 ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
-;;(package! all-the-icons-ibuffer)
-(package! all-the-icons)
-(package! all-the-icons-ivy-rich)
-;;(package! ivy-posframe)
+
+
+;;(package! all-the-icons-ivy-rich)
 (package! all-the-icons-dired)
-(package! google-translate)
-(package! vterm-toggle)
+;;(package! all-the-icons)
+;;(package! vscode-icon)
+;;(package! all-the-icons-completion)
+;;(package! treemacs-all-the-icons)
+
+(package! ivy-posframe)
+(package! bm)
 (package! rainbow-mode)
 (package! nyan-mode)
-(package! centaur-tabs)
 (package! tree-edit)
+
+;;NAVIGATION
 (package! treemacs-projectile)
 (package! treemacs-evil)
 (package! treemacs-icons-dired)
 (package! treemacs-magit)
 (package! treemacs-persp)
 (package! treemacs-tab-bar)
+(package! dirvish)
+(package! dired-rainbow)
+
+
+;;; VISUAL
+(package! centaur-tabs)
+(package! highlight-indent-guides)
+
+;;; JS/TS
+(package! typescript-mode)
+(package! npm)
+(package! ng2-mode)
+(package! nodejs-repl)
+(package! ts-docstr
+  :recipe (:host github :repo "emacs-vs/ts-docstr" :files (:defaults "langs/*.el")))
+
+;;; Treesitter
+(package! tree-sitter)
+(package! tree-sitter-langs)
+(package! eask)
+(package! tree-edit)
+(package! evil-tree-edit)
+
+;;FORMAT
+(package! emmet-mode)
+(package! prettier)
+(package! format-all)
+
+;;DEBUG
 (package! dap-mode)
-(package! web-mode)
-;;(package! forge)
-(package! grip-mode)
-;;(package! forge)
-;;(package! emmet-mode)
-;;(package! prettier)
+
+;;GIT
+(package! msgu :recipe (:host github :repo "jcs-elpa/msgu"))
+(package! forge)
 (package! blamer)
-(package! blamer :recipe (:host github :repo "artawower/blamer.el"))
-(package! sideline :recipe (:host github :repo "emacs-sideline/sideline"))
-(package! sideline-blame :recipe (:host github :repo "emacs-sideline/sideline-blame"))
-(package! sideline-lsp)
-(package! sideline-flycheck)
+;;(package! sideline :recipe (:host github :repo "emacs-sideline/sideline"))
+;;(package! sideline-blame :recipe (:host github :repo "emacs-sideline/sideline-blame"))
+;;(package! sideline-lsp)
+;;(package! sideline-flycheck)
 (package! gist)
 (package! git-messenger)
+
+;;TERMINAL
+(package! multi-vterm)
+(package! vterm-toggle)
+
+;;;; Jinja
+(package! jinja2-mode)
+
+;;;; Python
+(package! pyvenv)
+(package! python-mode)
+(package! auto-complete)
+(package! lsp-python-ms)
+(package! lsp-pyright)
+(package! lsp-jedi)
+(package! lsp-ui)
+;;(package! poetry)
+
+;;; Markup
+(package! pug-mode)
+(package! auto-rename-tag)
+
+;;KEYS
+(package! evil-leader)
+(package! evil-matchit)
 (package! hydra)
-(package! autopair :recipe (:host github :repo "joaotavora/autopair")) ;; Autorpair colors
+
+;;HTTP
+(package! websocket)
+(package! restclient)
+
+;;EDIT
+(package! move-text)
+
+;;EMAIL
+(package! mu4e-alert)
+(package! mu4e-views)
+(package! xwwp)
+(package! xwidgets-reuse)
+
+;;;; Vue volar lsp
+(package! lsp-volar :recipe (:host github :repo "jadestrong/lsp-volar"))
+(package! web-mode)
+
+;;; Undo
+(package! vundo)
+(package! undo-fu-session)
+(package! undo-tree :disable t)
+
+;;OTHERS
+(package! turbo-log :recipe (:host github :repo "artawower/turbo-log"))
+(package! reverse-im)
+(package! grip-mode)
 (package! origami)
 (package! lsp-grammarly)
 (package! outline-minor-faces)
+(package! google-translate)
+(package! telega)
+(package! minions)
 
-(package! highlight-indent-guides)
-(package! aweshell :recipe (:host github :repo "manateelazycat/aweshell"))
-(package! eshell-prompt-extras)
+;;; Disable doom crap
+(package! evil-goggles :disable t)
+
+(package! quicktype :recipe (:host github :repo "artawower/quicktype.el"))
+
+
