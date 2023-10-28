@@ -2130,7 +2130,8 @@ parses its input."
           ng2-ts-mode
           python-mode
           dart-mode
-          typescript-tsx-mode) . lsp-deferred)
+          typescript-tsx-mode
+	  ) . lsp-deferred)
   :bind (:map evil-normal-state-map
               ("SPC f n" . flycheck-next-error)
               ("g i" . lsp-goto-implementation)
@@ -2145,7 +2146,6 @@ parses its input."
   (lsp-eldoc-render-all nil)
   (lsp-prefer-flymake nil)
   (lsp-modeline-diagnostics-scope :workspace)
-  (lsp-clients-typescript-server-args '("--stdio" "--tsserver-log-file" "/dev/stderr"))
   (lsp-yaml-schemas '((kubernetes . ["/auth-reader.yaml", "/deployment.yaml"])))
   ;; Disable bottom help info
   (lsp-signature-render-documentation nil)
@@ -2208,7 +2208,8 @@ parses its input."
 
 (use-package! eask)
 
-(use-package! tree-sitter-langs)
+(use-package! tree-sitter-langs
+  :after tree-sitter)
 
 
 (use-package! tree-sitter
@@ -2217,6 +2218,8 @@ parses its input."
   :init
   (setq tsc-dyn-get-from nil)
   :config
+  (global-tree-sitter-mode)
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
   (setq tsc-dyn-get-from '(:github))
   (setq tsc-dyn-get-from nil)
   (advice-add 'tree-sitter-hl-mode :before 'my-set-spellfu-faces)
@@ -2360,12 +2363,46 @@ parses its input."
 
 ;;TYPESCRIPT
 
-(setenv "TSSERVER_LOG_FILE" "/tmp/tsserver.log")
+;;(setenv "TSSERVER_LOG_FILE" "/tmp/tsserver.log")
 (use-package! typescript-mode
-  :defer 10
+  :after tree-sitter
   :config
-  (setq typescript-indent-level 2)
-  (add-to-list 'auto-mode-alist '("\.ts\'" . typescript-mode)))
+  ;; we choose this instead of tsx-mode so that eglot can automatically figure out language for server
+  ;; see https://github.com/joaotavora/eglot/issues/624 and https://github.com/joaotavora/eglot#handling-quirky-servers
+  (define-derived-mode typescriptreact-mode typescript-mode
+    "TypeScript TSX")
+
+  ;; use our derived mode for tsx files
+  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
+  ;; by default, typescript-mode is mapped to the treesitter typescript parser
+  ;; use our derived mode to map both .tsx AND .ts -> typescriptreact-mode -> treesitter tsx
+  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx))
+
+  (setq typescript-indent-level 2))
+
+
+;; https://github.com/orzechowskid/tsi.el/
+;; great tree-sitter-based indentation for typescript/tsx, css, json
+(use-package tsi
+  :after tree-sitter
+  ;; define autoload definitions which when actually invoked will cause package to be loaded
+  :commands (tsi-typescript-mode tsi-json-mode tsi-css-mode)
+  :init
+  (add-hook 'typescript-mode-hook (lambda () (tsi-typescript-mode 1)))
+  (add-hook 'json-mode-hook (lambda () (tsi-json-mode 1)))
+  (add-hook 'css-mode-hook (lambda () (tsi-css-mode 1)))
+  (add-hook 'scss-mode-hook (lambda () (tsi-scss-mode 1))))
+
+;; auto-format different source code files extremely intelligently
+;; https://github.com/radian-software/apheleia
+(use-package apheleia
+  :ensure t
+  :config
+  (apheleia-global-mode +1))
+
+(use-package eglot
+  :ensure t)
+
 
 ;;JAVSCRIPT
 (use-package! js2-mode

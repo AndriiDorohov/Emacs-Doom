@@ -171,6 +171,8 @@
 (package! telega)
 (package! minions)
 
+(package! tsi :recipe (:host github :repo "orzechowskid/tsi.el"))
+
 ;;; Disable doom crap
 (package! evil-goggles :disable t)
 
