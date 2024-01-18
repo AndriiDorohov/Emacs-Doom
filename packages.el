@@ -52,7 +52,7 @@
 
 ;;(package! all-the-icons-ivy-rich)
 (package! all-the-icons-dired)
-;;(package! all-the-icons)
+(package! all-the-icons)
 ;;(package! vscode-icon)
 ;;(package! all-the-icons-completion)
 ;;(package! treemacs-all-the-icons)
@@ -78,7 +78,11 @@
 (package! centaur-tabs)
 (package! highlight-indent-guides)
 
+;;; AUTOCOMPLETE
+(package! corfu)
+
 ;;; JS/TS
+(package! tide)
 (package! typescript-mode)
 (package! npm)
 (package! ng2-mode)
@@ -171,6 +175,27 @@
 (package! telega)
 (package! minions)
 
+(package! vlf :recipe (:host github :repo "emacs-straight/vlf" :files ("*.el"))
+  :pin "cacdb359f8c37c6e7e4c7937462b632d22462130")
+(package! aas :recipe (:host github :repo "ymarco/auto-activating-snippets")
+  :pin "e92b5cffa4e87c221c24f3e72ae33959e1ec2b68")
+
+(package! screenshot :recipe (:host github :repo "tecosaur/screenshot"))
+
+(package! etrace :recipe (:host github :repo "aspiers/etrace")
+  :pin "2291ccf2f2ccc80a6aac4664e8ede736ceb672b7")
+(package! theme-magic :pin "844c4311bd26ebafd4b6a1d72ddcc65d87f074e3")
+(package! string-inflection :pin "50ad54970b3cc79b6b83979bde9889ad9a9e1a9c")
+(package! info-colors :pin "2e237c301ba62f0e0286a27c1abe48c4c8441143")
+(package! keycast :pin "72d9add8ba16e0cae8cfcff7fc050fa75e493b4e")
+
+(package! gif-screencast :pin "adec408e6adab2e8e057fe0ad828749f473bfb83")
+(package! page-break-lines :recipe (:host github :repo "purcell/page-break-lines")
+  :pin "79eca86e0634ac68af862e15c8a236c37f446dcd")
+
+
+
+
 (package! tsi :recipe (:host github :repo "orzechowskid/tsi.el"))
 
 ;;; Disable doom crap
@@ -178,4 +203,27 @@
 
 (package! quicktype :recipe (:host github :repo "artawower/quicktype.el"))
 
-
+;;; Org mode
+;; (package! polymode)
+;; (package! poly-org)
+(package! ox-gfm)
+(package! ob-dart)
+(package! oauth2)
+(package! org-caldav)
+(package! org-superstar)
+(unpin! org-roam)
+(package! web-roam
+  :recipe (:host github :repo "artawower/web-roam.el"))
+(package! org-roam)
+(package! org-roam-ui :recipe (:host github :repo "org-roam/org-roam-ui" :files ("*.el" "out")))
+(package! org-fancy-priorities)
+;; (package! org-modern)
+;;;; Org babel
+(package! ob-restclient)
+(package! ob-async)
+;;; Reading
+;;;; Rss
+(package! elfeed-score)
+;;;; Pocket
+(package! pocket-reader)
+;;; Agenda
