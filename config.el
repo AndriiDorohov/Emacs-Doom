@@ -84,9 +84,6 @@
 (setq auth-sources '("~/.authinfo")
       auth-source-cache-expiry nil) ; default is 7200 (2h)
 
-;; (setq default-directory "/Users/apogee/repositories/")
-
-
 ;;:------------------------
 ;;; Better defaults
 ;;:------------------------
@@ -140,7 +137,6 @@
 ;;; Doom
 ;;:------------------------
 
-;; This block defines `+emoji-rx' and `+emoji-set-font'.
 
 (setq doom-font (font-spec :family "JetBrains Mono" :size 16)
       doom-big-font (font-spec :family "JetBrains Mono" :size 26)
@@ -148,57 +144,6 @@
       doom-unicode-font (font-spec :family "JuliaMono")
       doom-emoji-font (font-spec :family "Twitter Color Emoji")      
       doom-serif-font (font-spec :family "IBM Plex Mono" :size 12 :weight 'light))
-(add-hook! 'after-setting-font-hook
-  (defun +emoji-set-font ()
-    (set-fontset-font t 'emoji doom-emoji-font nil 'prepend)))
-
-(defvar +emoji-rx
-  (let (emojis)
-    (map-char-table
-     (lambda (char set)
-       (when (eq set 'emoji)
-         (push (copy-tree char) emojis)))
-     char-script-table)
-    (rx-to-string `(any ,@emojis)))
-  "A regexp to find all emoji-script characters.")
-(setq emoji-alternate-names
-      '(("🙂" ":)")
-        ("😄" ":D")
-        ("😉" ";)")
-        ("🙁" ":(")
-        ("😆" "laughing face" "xD")
-        ("🤣" "ROFL face")
-        ("😢" ":'(")
-        ("🥲" ":')")
-        ("😮" ":o")
-        ("😑" ":|")
-        ("😎" "cool face")
-        ("🤪" "goofy face")
-        ("🤥" "pinnochio face" "liar face")
-        ("😠" ">:(")
-        ("😡" "angry+ face")
-        ("🤬" "swearing face")
-        ("🤢" "sick face")
-        ("😈" "smiling imp")
-        ("👿" "frowning imp")
-        ("❤️" "<3")
-        ("🫡" "o7")
-        ("👍" "+1")
-        ("👎" "-1")
-        ("👈" "left")
-        ("👉" "right")
-        ("👆" "up")
-        ("💯" "100")
-        ("💸" "flying money")))
-(when (>= emacs-major-version 29)
-  (map! :leader
-        (:prefix ("e" . "Emoji")
-         :desc "Search" "s" #'emoji-search
-         :desc "Recent" "r" #'emoji-recent
-         :desc "List" "l" #'emoji-list
-         :desc "Describe" "d" #'emoji-describe
-         :desc "Insert" "i" #'emoji-insert
-         :desc "Insert" "e" #'emoji-insert)))
 
 (setq +m-color-main "#61AFEF"
       +m-color-secondary "red")
@@ -227,6 +172,7 @@
 (map! :leader
       (:prefix "b"
        :desc "New empty Org buffer" "o" #'+evil-buffer-org-new))
+
 
 
 (defconst jetbrains-ligature-mode--ligatures
@@ -289,557 +235,6 @@
     (progn
       (set-frame-parameter (selected-frame) 'alpha `(,alpha . ,alpha))
       (add-to-list 'default-frame-alist `(alpha . (,alpha . ,alpha))))))
-
-
-;;:------------------------
-;;; Dashboard
-;;:------------------------
-
-;; This block defines `+doom-dashboard-tweak',
-;; `+doom-dashboard-benchmark-line',
-;; `+doom-dashboard-setup-modified-keymap', and
-;; `doom-dashboard-draw-ascii-emacs-banner-fn'.
-
-
-
-(defun doom-dashboard-draw-ascii-emacs-banner-fn ()
-  (let* ((banner
-          '(",---.,-.-.,---.,---.,---."
-            "|---'| | |,---||    `---."
-            "`---'` ' '`---^`---'`---'"))
-         (longest-line (apply #'max (mapcar #'length banner))))
-    (put-text-property
-     (point)
-     (dolist (line banner (point))
-       (insert (+doom-dashboard--center
-                +doom-dashboard--width
-                (concat
-                 line (make-string (max 0 (- longest-line (length line)))
-                                   32)))
-               "\n"))
-     'face 'doom-dashboard-banner)))
-(unless (display-graphic-p) ; for some reason this messes up the graphical splash screen atm
-  (setq +doom-dashboard-ascii-banner-fn #'doom-dashboard-draw-ascii-emacs-banner-fn))
-(defun +doom-dashboard-setup-modified-keymap ()
-  (setq +doom-dashboard-mode-map (make-sparse-keymap))
-  (map! :map +doom-dashboard-mode-map
-        :desc "Find file" :ng "f" #'find-file
-        :desc "Recent files" :ng "r" #'consult-recent-file
-        :desc "Config dir" :ng "C" #'doom/open-private-config
-        :desc "Open config.org" :ng "c" (cmd! (find-file (expand-file-name "config.org" doom-user-dir)))
-        :desc "Open org-mode root" :ng "O" (cmd! (find-file (expand-file-name "lisp/org/" doom-user-dir)))
-        :desc "Open dotfile" :ng "." (cmd! (doom-project-find-file "~/.config/"))
-        :desc "Notes (roam)" :ng "n" #'org-roam-node-find
-        :desc "Switch buffer" :ng "b" #'+vertico/switch-workspace-buffer
-        :desc "Switch buffers (all)" :ng "B" #'consult-buffer
-        :desc "IBuffer" :ng "i" #'ibuffer
-        :desc "Previous buffer" :ng "p" #'previous-buffer
-        :desc "Set theme" :ng "t" #'consult-theme
-        :desc "Quit" :ng "Q" #'save-buffers-kill-terminal
-        :desc "Show keybindings" :ng "h" (cmd! (which-key-show-keymap '+doom-dashboard-mode-map))))
-
-(add-transient-hook! #'+doom-dashboard-mode (+doom-dashboard-setup-modified-keymap))
-(add-transient-hook! #'+doom-dashboard-mode :append (+doom-dashboard-setup-modified-keymap))
-(add-hook! 'doom-init-ui-hook :append (+doom-dashboard-setup-modified-keymap))
-(map! :leader :desc "Dashboard" "d" #'+doom-dashboard/open)
-(defun +doom-dashboard-benchmark-line ()
-  "Insert the load time line."
-  (when doom-init-time
-    (insert
-     "\n\n"
-     (propertize
-      (+doom-dashboard--center
-       +doom-dashboard--width
-       (doom-display-benchmark-h 'return))
-      'face 'doom-dashboard-loaded))))
-(remove-hook 'doom-after-init-hook #'doom-display-benchmark-h)
-(setq +doom-dashboard-functions
-      (list #'doom-dashboard-widget-banner
-            #'+doom-dashboard-benchmark-line))
-(defun +doom-dashboard-tweak (&optional _)
-  (when-let ((dashboard-buffer (get-buffer +doom-dashboard-name)))
-    (with-current-buffer dashboard-buffer
-      (setq-local line-spacing 0.2
-                  mode-line-format nil
-                  evil-normal-state-cursor (list nil)))))
-(add-hook '+doom-dashboard-mode-hook #'+doom-dashboard-tweak)
-(add-hook 'doom-after-init-hook #'+doom-dashboard-tweak 1)
-(setq +doom-dashboard-name "► Doom"
-      doom-fallback-buffer-name +doom-dashboard-name)
-;;; config-dashboard.el ends here
-
-
-
-;;:------------------------
-;;; Better jumper mouse
-;;:------------------------
-
-(map! :n [mouse-8] #'better-jumper-jump-backward
-      :n [mouse-9] #'better-jumper-jump-forward)
-
-;;:------------------------
-;;; Frame title
-;;:------------------------
-
-(setq frame-title-format
-      '(""
-        (:eval
-         (if (string-match-p (regexp-quote (or (bound-and-true-p org-roam-directory) "\u0000"))
-                             (or buffer-file-name ""))
-             (replace-regexp-in-string
-              ".*/[0-9]*-?" "☰ "
-              (subst-char-in-string ?_ ?\s buffer-file-name))
-           "%b"))
-        (:eval
-         (when-let ((project-name (and (featurep 'projectile) (projectile-project-name))))
-           (unless (string= "-" project-name)
-             (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
-
-
-;;:------------------------
-;;; Emacs daemon setup
-;;:------------------------
-
-;; This block defines `greedily-do-daemon-setup'.
-
-(defun greedily-do-daemon-setup ()
-  (require 'org)
-  (when (require 'mu4e nil t)
-    (setq mu4e-confirm-quit t)
-    (setq +mu4e-lock-greedy t)
-    (setq +mu4e-lock-relaxed t)
-    (when (+mu4e-lock-available t)
-      (mu4e--start)))
-  (when (require 'elfeed nil t)
-    (run-at-time nil (* 8 60 60) #'elfeed-update)))
-
-(when (daemonp)
-  (add-hook 'emacs-startup-hook #'greedily-do-daemon-setup)
-  (add-hook! 'server-after-make-frame-hook
-    (unless (string-match-p "\\*draft\\|\\*stdin\\|emacs-everywhere" (buffer-name))
-      (switch-to-buffer +doom-dashboard-name))))
-
-
-;;:------------------------
-;;; !Pkg avy
-;;:------------------------
-
-(use-package! avy
-  :defer t
-  :bind (:map evil-normal-state-map
-              ("SPC k l" . avy-kill-whole-line)
-              ("SPC k r" . avy-kill-region))
-  :custom
-  (avy-single-candidate-jump t)
-  (avy-keys '(?w ?e ?r ?t ?y ?u ?i ?o ?p ?a ?s ?d ?f ?g ?h ?j ?k ?l ?z ?x ?c ?v ?b ?n ?m)))
-
-
-;;:------------------------
-;;; !Pkg which-key
-;;:------------------------
-
-(setq which-key-idle-delay 0.5) ;; I need the help, I really do
-(setq which-key-allow-multiple-replacements t)
-(after! which-key
-  (pushnew!
-   which-key-replacement-alist
-   '(("" . "\\`+?evil[-:]?\\(?:a-\\)?\\(.*\\)") . (nil . "◂\\1"))
-   '(("\\`g s" . "\\`evilem--?motion-\\(.*\\)") . (nil . "◃\\1"))
-   ))
-
-;;:------------------------
-;;; Multi-mode abbrev
-;;:------------------------
-
-;; This block defines `+abbrev-file-name'.
-
-(add-hook 'doom-first-buffer-hook
-          (defun +abbrev-file-name ()
-            (setq-default abbrev-mode t)
-            (setq abbrev-file-name (expand-file-name "abbrev.el" doom-private-dir))))
-
-
-;;:------------------------
-;;; !Pkg VLF
-;;:------------------------
-
-;; This block defines `+vlf-isearch-wrap', `+vlf-last-chunk-or-end',
-;; `+vlf-next-chunk-or-start', and `+vlf-update-linum'.
-
-(use-package! vlf-setup
-  :defer-incrementally vlf-tune vlf-base vlf-write
-  vlf-search vlf-occur vlf-follow vlf-ediff vlf
-  :commands vlf vlf-mode
-  :init
-  (defadvice! +files--ask-about-large-file-vlf (size op-type filename offer-raw)
-  "Like `files--ask-user-about-large-file', but with support for `vlf'."
-  :override #'files--ask-user-about-large-file
-  (if (eq vlf-application 'dont-ask)
-      (progn (vlf filename) (error ""))
-    (let ((prompt (format "File %s is large (%s), really %s?"
-                          (file-name-nondirectory filename)
-                          (funcall byte-count-to-string-function size) op-type)))
-      (if (not offer-raw)
-          (if (y-or-n-p prompt) nil 'abort)
-        (let ((choice
-               (car
-                (read-multiple-choice
-                 prompt '((?y "yes")
-                          (?n "no")
-                          (?l "literally")
-                          (?v "vlf"))
-                 (files--ask-user-about-large-file-help-text
-                  op-type (funcall byte-count-to-string-function size))))))
-          (cond ((eq choice ?y) nil)
-                ((eq choice ?l) 'raw)
-                ((eq choice ?v)
-                 (vlf filename)
-                 (error ""))
-                (t 'abort)))))))
-  :config
-  (advice-remove 'abort-if-file-too-large #'ad-Advice-abort-if-file-too-large)
-  (defvar-local +vlf-cumulative-linenum '((0 . 0))
-  "An alist keeping track of the cumulative line number.")
-
-(defun +vlf-update-linum ()
-  "Update the line number offset."
-  (let ((linenum-offset (alist-get vlf-start-pos +vlf-cumulative-linenum)))
-    (setq display-line-numbers-offset (or linenum-offset 0))
-    (when (and linenum-offset (not (assq vlf-end-pos +vlf-cumulative-linenum)))
-      (push (cons vlf-end-pos (+ linenum-offset
-                                 (count-lines (point-min) (point-max))))
-            +vlf-cumulative-linenum))))
-
-(add-hook 'vlf-after-chunk-update-hook #'+vlf-update-linum)
-
-;; Since this only works with absolute line numbers, let's make sure we use them.
-(add-hook! 'vlf-mode-hook (setq-local display-line-numbers t))
-  (defun +vlf-next-chunk-or-start ()
-  (if (= vlf-file-size vlf-end-pos)
-      (vlf-jump-to-chunk 1)
-    (vlf-next-batch 1))
-  (goto-char (point-min)))
-
-(defun +vlf-last-chunk-or-end ()
-  (if (= 0 vlf-start-pos)
-      (vlf-end-of-file)
-    (vlf-prev-batch 1))
-  (goto-char (point-max)))
-
-(defun +vlf-isearch-wrap ()
-  (if isearch-forward
-      (+vlf-next-chunk-or-start)
-    (+vlf-last-chunk-or-end)))
-
-(add-hook! 'vlf-mode-hook (setq-local isearch-wrap-function #'+vlf-isearch-wrap)))
-
-;;:------------------------
-;;; !Pkg Eros
-;;:------------------------
-
-(setq eros-eval-result-prefix "⟹ ") ; default =>
-
-;;:------------------------
-;;; !Pkg evil
-;;:------------------------
-
-(after! evil
-  (setq evil-ex-substitute-global t     ; I like my s/../.. to by global by default
-        evil-move-cursor-back nil       ; Don't move the block cursor when toggling insert mode
-        evil-kill-on-visual-paste nil)) ; Don't put overwritten text in the kill ring
-
-;;:------------------------
-;;; !Pkg Consult
-;;:------------------------
-
-(after! consult
-  (set-face-attribute 'consult-file nil :inherit 'consult-buffer)
-  (setf (plist-get (alist-get 'perl consult-async-split-styles-alist) :initial) ";"))
-
-;;:------------------------
-;;; !Pkg Magit
-;;:------------------------
-
-;; This block defines `+org-commit-message-template',
-;; `+magit-fill-in-commit-template', `+magit-default-forge-remote',
-;; and `+magit-project-commit-templates-alist'.
-
-(defvar +magit-project-commit-templates-alist nil
-  "Alist of toplevel dirs and template hf strings/functions.")
-(after! magit
-  (defvar +magit-default-forge-remote "gitea@git.tecosaur.net:tec/%s.git"
-  "Format string that fills out to a remote from the repo name.
-Set to nil to disable this functionality.")
-(defadvice! +magit-remote-add--streamline-forge-a (args)
-  :filter-args #'magit-remote-add
-  (interactive
-   (or (and +magit-default-forge-remote
-            (not (magit-list-remotes))
-            (eq (read-char-choice
-                 (format "Setup %s remote? [y/n]: "
-                         (replace-regexp-in-string
-                          "\\`\\(?:[^@]+@\\|https://\\)\\([^:/]+\\)[:/].*\\'" "\\1"
-                          +magit-default-forge-remote))
-                 '(?y ?n))
-                ?y)
-            (let* ((default-name
-                     (subst-char-in-string ?\s ?-
-                                           (file-name-nondirectory
-                                            (directory-file-name (doom-project-root)))))
-                   (name (read-string "Name: " default-name)))
-              (list "origin" (format +magit-default-forge-remote name)
-                    (transient-args 'magit-remote))))
-       (let ((origin (magit-get "remote.origin.url"))
-             (remote (magit-read-string-ns "Remote name"))
-             (gh-user (magit-get "github.user")))
-         (when (and (equal remote gh-user)
-                    (string-match "\\`https://github\\.com/\\([^/]+\\)/\\([^/]+\\)\\.git\\'"
-                                  origin)
-                    (not (string= (match-string 1 origin) gh-user)))
-           (setq origin (replace-regexp-in-string
-                         "\\`https://github\\.com/" "git@github.com:"
-                         origin)))
-         (list remote
-               (magit-read-url
-                "Remote url"
-                (and origin
-                     (string-match "\\([^:/]+\\)/[^/]+\\(\\.git\\)?\\'" origin)
-                     (replace-match remote t t origin 1)))
-               (transient-args 'magit-remote)))))
-  args)
-(defun +magit-fill-in-commit-template ()
-  "Insert template from `+magit-fill-in-commit-template' if applicable."
-  (when-let ((template (and (save-excursion (goto-char (point-min)) (string-match-p "\\`\\s-*$" (thing-at-point 'line)))
-                            (cdr (assoc (file-name-base (directory-file-name (magit-toplevel)))
-                                        +magit-project-commit-templates-alist)))))
-    (goto-char (point-min))
-    (insert (if (stringp template) template (funcall template)))
-    (goto-char (point-min))
-    (end-of-line)))
-(add-hook 'git-commit-setup-hook #'+magit-fill-in-commit-template 90)
-(defun +org-commit-message-template ()
-  "Create a skeleton for an Org commit message based on the staged diff."
-  (let (change-data last-file file-changes temp-point)
-    (with-temp-buffer
-      (apply #'call-process magit-git-executable
-             nil t nil
-             (append
-              magit-git-global-arguments
-              (list "diff" "--cached")))
-      (goto-char (point-min))
-      (while (re-search-forward "^@@\\|^\\+\\+\\+ b/" nil t)
-        (if (looking-back "^\\+\\+\\+ b/" (line-beginning-position))
-            (progn
-              (push (list last-file file-changes) change-data)
-              (setq last-file (buffer-substring-no-properties (point) (line-end-position))
-                    file-changes nil))
-          (setq temp-point (line-beginning-position))
-          (re-search-forward "^\\+\\|^-" nil t)
-          (end-of-line)
-          (cond
-           ((string-match-p "\\.el$" last-file)
-            (when (re-search-backward "^\\(?:[+-]? *\\|@@[ +-\\d,]+@@ \\)(\\(?:cl-\\)?\\(?:defun\\|defvar\\|defmacro\\|defcustom\\)" temp-point t)
-              (re-search-forward "\\(?:cl-\\)?\\(?:defun\\|defvar\\|defmacro\\|defcustom\\) " nil t)
-              (add-to-list 'file-changes (buffer-substring-no-properties (point) (forward-symbol 1)))))
-           ((string-match-p "\\.org$" last-file)
-            (when (re-search-backward "^[+-]\\*+ \\|^@@[ +-\\d,]+@@ \\*+ " temp-point t)
-              (re-search-forward "@@ \\*+ " nil t)
-              (add-to-list 'file-changes (buffer-substring-no-properties (point) (line-end-position)))))))))
-    (push (list last-file file-changes) change-data)
-    (setq change-data (delete '(nil nil) change-data))
-    (concat
-     (if (= 1 (length change-data))
-         (replace-regexp-in-string "^.*/\\|.[a-z]+$" "" (caar change-data))
-       "?")
-     ": \n\n"
-     (mapconcat
-      (lambda (file-changes)
-        (if (cadr file-changes)
-            (format "* %s (%s): "
-                    (car file-changes)
-                    (mapconcat #'identity (cadr file-changes) ", "))
-          (format "* %s: " (car file-changes))))
-      change-data
-      "\n\n"))))
-
-(add-to-list '+magit-project-commit-templates-alist (cons "org" #'+org-commit-message-template)))
-
-
-;;:------------------------
-;;; !Pkg Smerge
-;;:------------------------
-
-;; This block defines `smerge-repeatedly'.
-
-(defun smerge-repeatedly ()
-  "Perform smerge actions again and again"
-  (interactive)
-  (smerge-mode 1)
-  (smerge-transient))
-(after! transient
-  (transient-define-prefix smerge-transient ()
-    [["Move"
-      ("n" "next" (lambda () (interactive) (ignore-errors (smerge-next)) (smerge-repeatedly)))
-      ("p" "previous" (lambda () (interactive) (ignore-errors (smerge-prev)) (smerge-repeatedly)))]
-     ["Keep"
-      ("b" "base" (lambda () (interactive) (ignore-errors (smerge-keep-base)) (smerge-repeatedly)))
-      ("u" "upper" (lambda () (interactive) (ignore-errors (smerge-keep-upper)) (smerge-repeatedly)))
-      ("l" "lower" (lambda () (interactive) (ignore-errors (smerge-keep-lower)) (smerge-repeatedly)))
-      ("a" "all" (lambda () (interactive) (ignore-errors (smerge-keep-all)) (smerge-repeatedly)))
-      ("RET" "current" (lambda () (interactive) (ignore-errors (smerge-keep-current)) (smerge-repeatedly)))]
-     ["Diff"
-      ("<" "upper/base" (lambda () (interactive) (ignore-errors (smerge-diff-base-upper)) (smerge-repeatedly)))
-      ("=" "upper/lower" (lambda () (interactive) (ignore-errors (smerge-diff-upper-lower)) (smerge-repeatedly)))
-      (">" "base/lower" (lambda () (interactive) (ignore-errors (smerge-diff-base-lower)) (smerge-repeatedly)))
-      ("R" "refine" (lambda () (interactive) (ignore-errors (smerge-refine)) (smerge-repeatedly)))
-      ("E" "ediff" (lambda () (interactive) (ignore-errors (smerge-ediff)) (smerge-repeatedly)))]
-     ["Other"
-      ("c" "combine" (lambda () (interactive) (ignore-errors (smerge-combine-with-next)) (smerge-repeatedly)))
-      ("r" "resolve" (lambda () (interactive) (ignore-errors (smerge-resolve)) (smerge-repeatedly)))
-      ("k" "kill current" (lambda () (interactive) (ignore-errors (smerge-kill-current)) (smerge-repeatedly)))
-      ("q" "quit" (lambda () (interactive) (smerge-auto-leave)))]]))
-
-
-;;:------------------------
-;;; !Pkg Company
-;;:------------------------
-
-;;:------------------------
-;;; !Pkg Projectile
-;;:------------------------
-
-;; This block defines `projectile-ignored-project-function'.
-
-(setq projectile-ignored-projects
-      (list "~/" "/tmp" (expand-file-name "straight/repos" doom-local-dir)))
-(defun projectile-ignored-project-function (filepath)
-  "Return t if FILEPATH is within any of `projectile-ignored-projects'"
-  (or (mapcar (lambda (p) (s-starts-with-p p filepath)) projectile-ignored-projects)))
-
-;;:------------------------
-;;; !Pkg Ispell
-;;:------------------------
-
-(setq ispell-dictionary "en-custom")
-(setq ispell-personal-dictionary
-      (expand-file-name "misc/ispell_personal" doom-private-dir))
-
-
-;;:------------------------
-;;; TRAMP
-;;:------------------------
-
-(after! tramp
-  (setenv "SHELL" "/bin/bash")
-  (setq tramp-shell-prompt-pattern "\\(?:^\\|\n\\|\x0d\\)[^]#$%>\n]*#?[]#$%>] *\\(\e\\[[0-9;]*[a-zA-Z] *\\)*")) ;; default + 
-(after! tramp
-  (appendq! tramp-remote-path
-            '("~/.guix-profile/bin" "~/.guix-profile/sbin"
-              "/run/current-system/profile/bin"
-              "/run/current-system/profile/sbin")))
-
-
-;;:------------------------
-;;; !Pkg AAS
-;;:------------------------
-
-(use-package! aas
-  :commands aas-mode)
-
-
-
-;;:------------------------
-;;; !Pkg Screenshot
-;;:------------------------
-
-(use-package! screenshot
-  :defer t
-  :config (setq screenshot-upload-fn "upload %s 2>/dev/null"))
-
-
-;;:------------------------
-;;; !Pkg etrace
-;;:------------------------
-
-(use-package! etrace
-  :after elp)
-
-
-;;:------------------------
-;;; !Pkg YASnippet
-;;:------------------------
-
-(setq yas-triggers-in-field t)
-
-
-;;:------------------------
-;;; !Pkg String Inflection
-;;:------------------------
-
-(use-package! string-inflection
-  :commands (string-inflection-all-cycle
-             string-inflection-toggle
-             string-inflection-camelcase
-             string-inflection-lower-camelcase
-             string-inflection-kebab-case
-             string-inflection-underscore
-             string-inflection-capital-underscore
-             string-inflection-upcase)
-  :init
-  (map! :leader :prefix ("c~" . "naming convention")
-        :desc "cycle" "~" #'string-inflection-all-cycle
-        :desc "toggle" "t" #'string-inflection-toggle
-        :desc "CamelCase" "c" #'string-inflection-camelcase
-        :desc "downCase" "d" #'string-inflection-lower-camelcase
-        :desc "kebab-case" "k" #'string-inflection-kebab-case
-        :desc "under_score" "_" #'string-inflection-underscore
-        :desc "Upper_Score" "u" #'string-inflection-capital-underscore
-        :desc "UP_CASE" "U" #'string-inflection-upcase)
-  (after! evil
-    (evil-define-operator evil-operator-string-inflection (beg end _type)
-      "Define a new evil operator that cycles symbol casing."
-      :move-point nil
-      (interactive "<R>")
-      (string-inflection-all-cycle)
-      (setq evil-repeat-info '([?g ?~])))
-    (define-key evil-normal-state-map (kbd "g~") 'evil-operator-string-inflection)))
-
-;;:------------------------
-;;; !Pkg Info colors
-;;:------------------------
-
-(use-package! info-colors
-  :commands (info-colors-fontify-node))
-
-(add-hook 'Info-selection-hook 'info-colors-fontify-node)
-
-
-;;:------------------------
-;;; !Pkg Theme magic
-;;:------------------------
-
-(use-package! theme-magic
-  :commands theme-magic-from-emacs
-  :config
-  (defadvice! theme-magic--auto-extract-16-doom-colors ()
-    :override #'theme-magic--auto-extract-16-colors
-    (list
-     (face-attribute 'default :background)
-     (doom-color 'error)
-     (doom-color 'success)
-     (doom-color 'type)
-     (doom-color 'keywords)
-     (doom-color 'constants)
-     (doom-color 'functions)
-     (face-attribute 'default :foreground)
-     (face-attribute 'shadow :foreground)
-     (doom-blend 'base8 'error 0.1)
-     (doom-blend 'base8 'success 0.1)
-     (doom-blend 'base8 'type 0.1)
-     (doom-blend 'base8 'keywords 0.1)
-     (doom-blend 'base8 'constants 0.1)
-     (doom-blend 'base8 'functions 0.1)
-     (face-attribute 'default :foreground))))
 
 
 ;;:------------------------
@@ -982,159 +377,24 @@ Set to nil to disable this functionality.")
 ;;; config--pkg-doom-modeline.el ends here
 
 
-;;:------------------------
-;;; !Pkg Keycast
-;;:------------------------
-
-(use-package! keycast
-  :commands keycast-mode
-  :config
-  (define-minor-mode keycast-mode
-    "Show current command and its key binding in the mode line."
-    :global t
-    (if keycast-mode
-        (progn
-          (add-hook 'pre-command-hook 'keycast--update t)
-          (add-to-list 'global-mode-string '("" mode-line-keycast " ")))
-      (remove-hook 'pre-command-hook 'keycast--update)
-      (setq global-mode-string (remove '("" mode-line-keycast " ") global-mode-string))))
-  (custom-set-faces!
-    '(keycast-command :inherit doom-modeline-debug
-                      :height 0.9)
-    '(keycast-key :inherit custom-modified
-                  :height 1.1
-                  :weight bold)))
-
 
 ;;:------------------------
-;;; !Pkg Screencast
+;;; !Pkg avy
 ;;:------------------------
 
-;; This block defines `gif-screencast-write-colormap'.
-
-(use-package! gif-screencast
-  :commands gif-screencast-mode
-  :config
-  (map! :map gif-screencast-mode-map
-        :g "<f8>" #'gif-screencast-toggle-pause
-        :g "<f9>" #'gif-screencast-stop)
-  (setq gif-screencast-program "maim"
-        gif-screencast-args `("--quality" "3" "-i" ,(string-trim-right
-                                                     (shell-command-to-string
-                                                      "xdotool getactivewindow")))
-        gif-screencast-optimize-args '("--batch" "--optimize=3" "--usecolormap=/tmp/doom-color-theme"))
-  (defun gif-screencast-write-colormap ()
-    (f-write-text
-     (replace-regexp-in-string
-      "\n+" "\n"
-      (mapconcat (lambda (c) (if (listp (cdr c))
-                                 (cadr c))) doom-themes--colors "\n"))
-     'utf-8
-     "/tmp/doom-color-theme" ))
-  (gif-screencast-write-colormap)
-  (add-hook 'doom-load-theme-hook #'gif-screencast-write-colormap))
-
-
-;;:------------------------
-;;; !Pkg mixed pitch
-;;:------------------------
-
-;; This block defines `mixed-pitch-serif-mode', `init-mixed-pitch-h',
-;; and `mixed-pitch-modes'.
-
-(defvar mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
-  "Modes that `mixed-pitch-mode' should be enabled in, but only after UI initialisation.")
-(defun init-mixed-pitch-h ()
-  "Hook `mixed-pitch-mode' into each mode in `mixed-pitch-modes'.
-Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
-  (when (memq major-mode mixed-pitch-modes)
-    (mixed-pitch-mode 1))
-  (dolist (hook mixed-pitch-modes)
-    (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
-(add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
-(autoload #'mixed-pitch-serif-mode "mixed-pitch"
-  "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch." t)
-
-(setq! variable-pitch-serif-font (font-spec :family "Alegreya" :size 27))
-
-(after! mixed-pitch
-  (setq mixed-pitch-set-height t)
-  (set-face-attribute 'variable-pitch-serif nil :font variable-pitch-serif-font)
-  (defun mixed-pitch-serif-mode (&optional arg)
-    "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch."
-    (interactive)
-    (let ((mixed-pitch-face 'variable-pitch-serif))
-      (mixed-pitch-mode (or arg 'toggle)))))
-(set-char-table-range composition-function-table ?f '(["\\(?:ff?[fijlt]\\)" 0 font-shape-gstring]))
-(set-char-table-range composition-function-table ?T '(["\\(?:Th\\)" 0 font-shape-gstring]))
-
-
-;;:------------------------
-;;; Variable pitch serif font
-;;:------------------------
-
-;; This block defines `variable-pitch-serif-font' and
-;; `variable-pitch-serif'.
-
-(defface variable-pitch-serif
-    '((t (:family "serif")))
-    "A variable-pitch face with serifs."
-    :group 'basic-faces)
-(defcustom variable-pitch-serif-font (font-spec :family "serif")
-  "The font face used for `variable-pitch-serif'."
-  :group 'basic-faces
-  :set (lambda (symbol value)
-         (set-face-attribute 'variable-pitch-serif nil :font value)
-         (set-default-toplevel-value symbol value)))
-
-
-;;:------------------------
-;;; !Pkg Marginalia
-;;:------------------------
-
-;; This block defines `+marginalia-file-size-colorful' and
-;; `+marginalia--time-colorful'.
-
-(after! marginalia
-  (setq marginalia-censor-variables nil)
-
-  (defadvice! +marginalia--anotate-local-file-colorful (cand)
-    "Just a more colourful version of `marginalia--anotate-local-file'."
-    :override #'marginalia--annotate-local-file
-    (when-let (attrs (file-attributes (substitute-in-file-name
-                                       (marginalia--full-candidate cand))
-                                      'integer))
-      (marginalia--fields
-       ((marginalia--file-owner attrs)
-        :width 12 :face 'marginalia-file-owner)
-       ((marginalia--file-modes attrs))
-       ((+marginalia-file-size-colorful (file-attribute-size attrs))
-        :width 7)
-       ((+marginalia--time-colorful (file-attribute-modification-time attrs))
-        :width 12))))
-
-  (defun +marginalia--time-colorful (time)
-    (let* ((seconds (float-time (time-subtract (current-time) time)))
-           (color (doom-blend
-                   (face-attribute 'marginalia-date :foreground nil t)
-                   (face-attribute 'marginalia-documentation :foreground nil t)
-                   (/ 1.0 (log (+ 3 (/ (+ 1 seconds) 345600.0)))))))
-      ;; 1 - log(3 + 1/(days + 1)) % grey
-      (propertize (marginalia--time time) 'face (list :foreground color))))
-
-  (defun +marginalia-file-size-colorful (size)
-    (let* ((size-index (/ (log10 (+ 1 size)) 7.0))
-           (color (if (< size-index 10000000) ; 10m
-                      (doom-blend 'orange 'green size-index)
-                    (doom-blend 'red 'orange (- size-index 1)))))
-      (propertize (file-size-human-readable size) 'face (list :foreground color)))))
+(use-package! avy
+  :defer t
+  :bind (:map evil-normal-state-map
+              ("SPC k l" . avy-kill-whole-line)
+              ("SPC k r" . avy-kill-region))
+  :custom
+  (avy-single-candidate-jump t)
+  (avy-keys '(?w ?e ?r ?t ?y ?u ?i ?o ?p ?a ?s ?d ?f ?g ?h ?j ?k ?l ?z ?x ?c ?v ?b ?n ?m)))
 
 
 ;;:------------------------
 ;;; !Pkg Centaur Tabs
 ;;:------------------------
-
-
 
 (after! centaur-tabs
   (centaur-tabs-mode -1)
@@ -1146,659 +406,6 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
         centaur-tabs-gray-out-icons 'buffer)
   (centaur-tabs-change-fonts "P22 Underground Book" 160))
 ;; (setq x-underline-at-descent-line t)
-
-
-;;:------------------------
-;;; !Pkg Nerd Icons
-;;:------------------------
-
-;;(after! nerd-icons
-;;  (setcdr (assoc "m" nerd-icons-extension-icon-alist)
-;;          (cdr (assoc "matlab" nerd-icons-extension-icon-alist))))
-
-
-;;:------------------------
-;;; !Pkg page break lines
-;;:------------------------
-
-(use-package! page-break-lines
-  :commands page-break-lines-mode
-  :init
-  (autoload 'turn-on-page-break-lines-mode "page-break-lines")
-  :config
-  (setq page-break-lines-max-width fill-column)
-  (map! :prefix "g"
-        :desc "Prev page break" :nv "[" #'backward-page
-        :desc "Next page break" :nv "]" #'forward-page))
-
-
-;;:------------------------
-;;; Writeroom
-;;:------------------------
-
-;; This block defines `+zen-nonprose-org-h', `+zen-prose-org-h',
-;; `+zen-enable-mixed-pitch-mode-h', `+zen-org-starhide', and
-;; `+zen-serif-p'.
-
-(setq +zen-text-scale 0.8)
-(defvar +zen-serif-p t
-  "Whether to use a serifed font with `mixed-pitch-mode'.")
-(defvar +zen-org-starhide t
-  "The value `org-modern-hide-stars' is set to.")
-
-(after! writeroom-mode
-  (defvar-local +zen--original-org-indent-mode-p nil)
-  (defvar-local +zen--original-mixed-pitch-mode-p nil)
-  (defun +zen-enable-mixed-pitch-mode-h ()
-    "Enable `mixed-pitch-mode' when in `+zen-mixed-pitch-modes'."
-    (when (apply #'derived-mode-p +zen-mixed-pitch-modes)
-      (if writeroom-mode
-          (progn
-            (setq +zen--original-mixed-pitch-mode-p mixed-pitch-mode)
-            (funcall (if +zen-serif-p #'mixed-pitch-serif-mode #'mixed-pitch-mode) 1))
-        (funcall #'mixed-pitch-mode (if +zen--original-mixed-pitch-mode-p 1 -1)))))
-  (defun +zen-prose-org-h ()
-    "Reformat the current Org buffer appearance for prose."
-    (when (eq major-mode 'org-mode)
-      (setq display-line-numbers nil
-            visual-fill-column-width 60
-            org-adapt-indentation nil)
-      (when (featurep 'org-modern)
-        (setq-local org-modern-star '("🙘" "🙙" "🙚" "🙛")
-                    ;; org-modern-star '("🙐" "🙑" "🙒" "🙓" "🙔" "🙕" "🙖" "🙗")
-                    org-modern-hide-stars +zen-org-starhide)
-        (org-modern-mode -1)
-        (org-modern-mode 1))
-      (setq
-       +zen--original-org-indent-mode-p org-indent-mode)
-      (org-indent-mode -1)))
-  (defun +zen-nonprose-org-h ()
-    "Reverse the effect of `+zen-prose-org'."
-    (when (eq major-mode 'org-mode)
-      (when (bound-and-true-p org-modern-mode)
-        (org-modern-mode -1)
-        (org-modern-mode 1))
-      (when +zen--original-org-indent-mode-p (org-indent-mode 1))))
-  (pushnew! writeroom--local-variables
-            'display-line-numbers
-            'visual-fill-column-width
-            'org-adapt-indentation
-            'org-modern-mode
-            'org-modern-star
-            'org-modern-hide-stars)
-  (add-hook 'writeroom-mode-enable-hook #'+zen-prose-org-h)
-  (add-hook 'writeroom-mode-disable-hook #'+zen-nonprose-org-h))
-
-
-;;:------------------------
-;;; Mail
-;;:------------------------
-
-;; This block defines `+org-msg-goto-body-when-replying',
-;; `+org-msg-goto-body', `+mu4e-org-ml-signature',
-;; `+mu4e-goto-subject-not-to-once', `+mu4e-compose-org-ml-setup',
-;; `+browse-url-orgmode-ml', `+mu4e-ml-message-link',
-;; `+org-ml-transient-mu4e-action', `+org-ml-select-patch-thread',
-;; `+org-ml-current-patches', `+org-ml-apply-patch', `+org-ml--cache',
-;; `+org-ml--cache-timestamp', `+org-ml-max-age',
-;; `+org-ml-target-dir', `+mu4e-insert-woof-header',
-;; `+mu4e-get-woof-header', `+mu4e-evil-enter-insert-mode',
-;; `+mu4e-account-sent-folder', `+mu4e-update-personal-addresses',
-;; `mu4e-from-name', `mu4e-compose-from-mailto',
-;; `+mu4e-header--folder-colors', `mu4e-reindex-maybe',
-;; `mu4e-file-reindex-request', `mu4e-reindex-request--add-watcher',
-;; `mu4e-reindex-request--last-time',
-;; `mu4e-reindex-request--file-just-deleted',
-;; `mu4e-reindex-request--file-watcher',
-;; `mu4e-reindex-request-min-seperation', and
-;; `mu4e-reindex-request-file'.
-
-;; Begin pre
-(setq +org-msg-accent-color "#1a5fb4")
-;; End pre
-
-
-;;------------------------MAIL------------------------------------------------
-
-;; Load mu4e from the installation path.
-(use-package mu4e
-  :load-path  "/usr/local/Cellar/mu/1.10.7/share/emacs/site-lisp/mu/mu4e/"
-  :defer 20 ; Wait until 20 seconds after startup
-  :config
-  ;; For sending mails
-  (require 'smtpmail)
-  ;;mu4e-general-settings
-  ;; we installed this with homebrew
-  (setq mu4e-mu-binary (executable-find "mu"))
-  ;; this is the directory we created before:
-  (setq mu4e-maildir "~/.maildir")
-  ;; this command is called to sync imap servers:
-  (setq mu4e-get-mail-command (concat (executable-find "mbsync") " -a"))
-  ;; how often to call it in seconds:
-  (setq mu4e-update-interval 300)
-  ;;for mu4e completions (maildir folders, etc)
-  (setq mu4e-completing-read-function #'completing-read)
-  
-  ;; save attachment to desktop by default
-  ;; or another choice of yours:
-  (setq mu4e-attachment-dir "~/Desktop")
-  ;; Make sure that moving a message (like to Trash) causes the
-  ;; message to get a new file name.  This helps to avoid the
-  ;; dreaded "UID is N beyond highest assigned" error.
-  ;; See this link for more info: https://stackoverflow.com/a/43461973
-  (setq mu4e-change-filenames-when-moving t)
-
-  ;; list of your email adresses:
-  (setq mu4e-user-mail-address-list '("wedpositive@gmail.com"
-				      "dorokhov.andrii@gmail.com"
-				      "andrii.dorokhov@icloud.com"))
-
-;;mu4e-favorites
-  ;; check your ~/.maildir to see how the subdirectories are called
-  ;; for the generic imap account:
-  ;; e.g `ls ~/.maildir/example'
-  (setq   mu4e-maildir-shortcuts
-          '(("/icloud/INBOX" . ?i)
-            ("/icloud/Sent Messages" . ?I)
-            ("/gmail/INBOX" . ?g)
-            ("/gmail/[Gmail]/Sent Mail" . ?G)
-	    ("/gmail/Trash" . ?t)
-	    ("/official/INBOX" . ?e)
- 	    ("/official/[Gmail]/Sent Mail" . ?O)
-	    ("/official/Trash" . ?o)))
-  
-;;mu4e-context
-  (setq mu4e-contexts
-        `(,(make-mu4e-context
-          :name "icloud"
-          :enter-func (lambda () (mu4e-message "Enter andrii.dorokhov@icloud.com context"))
-          :leave-func (lambda () (mu4e-message "Leave andrii.dorokhov@icloud.com context"))
-          :match-func (lambda (msg)
-                        (when msg
-                          (mu4e-message-contact-field-matches msg
-                                                  :to "andrii.dorokhov@icloud.com")))
-          :vars '((user-mail-address . "andrii.dorokhov@icloud.com" )
-                  (user-full-name . "Andrii Dorokhov")
-                  (mu4e-drafts-folder . "/icloud/Drafts")
-                  (mu4e-refile-folder . "/icloud/Archive")
-                  (mu4e-sent-folder . "/icloud/Sent Messages")
-                  (mu4e-trash-folder . "/icloud/Deleted Messages")))
-	  
-	  ,(make-mu4e-context
-          :name "official"
-          :enter-func (lambda () (mu4e-message "Enter dorokhov.andrii@gmail.com context"))
-          :leave-func (lambda () (mu4e-message "Leave dorokhov.andrii@gmail.com context"))
-          :match-func (lambda (msg)
-                        (when msg
-                          (mu4e-message-contact-field-matches msg
-                                                  :to "dorokhov.andrii@gmail.com")))
-          :vars '((user-mail-address . "dorokhov.andrii@gmail.com")
-                  (user-full-name . "Andrii Dorokhov")
-                  (mu4e-drafts-folder . "/official/Drafts")
-                  (mu4e-refile-folder . "/official/Archive")
-                  (mu4e-sent-folder . "/official/Sent")
-                  (mu4e-trash-folder . "/official/Trash")))
-	  
-	  ,(make-mu4e-context
-            :name "gmail"
-            :enter-func (lambda () (mu4e-message "Enter wedpositive@gmail.com context"))
-            :leave-func (lambda () (mu4e-message "Leave wedpositive@gmail.com context"))
-            :match-func (lambda (msg)
-                          (when msg
-                            (mu4e-message-contact-field-matches msg
-                                                                :to "wedpositive@gmail.com")))
-            :vars '((user-mail-address . "wedpositive@gmail.com")
-                    (user-full-name . "Andrii Dorokhov")
-                    (mu4e-drafts-folder . "/gmail/Drafts")
-                    (mu4e-refile-folder . "/gmail/Archive")
-                    (mu4e-sent-folder . "/gmail/Sent")
-                    (mu4e-trash-folder . "/gmail/Trash")
-		    (mu4e-sent-messages-behavior . sent)))))
-
-  (setq mu4e-context-policy 'pick-first) ;; start with the first (default) context;
-  (setq mu4e-compose-context-policy 'ask) ;; ask for context if no context matches;
-
-   ;; Display options
-  (setq mu4e-view-show-images t)
-  (setq mu4e-view-show-addresses 't)
-
-  ;; Composing mail
-  (setq mu4e-compose-dont-reply-to-self t)
-
-;;mu4e-sending
-;; GPG encryption & decryption:
-
-  ;; This can be left alone
-  (require 'epa-file)
-  (epa-file-enable)
-  (setq epa-pinentry-mode 'loopback)
-  (auth-source-forget-all-cached)
-
-  ;; Don't keep message compose buffers around after sending
-  (setq message-kill-buffer-on-exit t)
-
-  (setq dw/mu4e-inbox-query "maildir:/gmail/INBOX AND flag:unread")
-
-  ;; Send function:
-  ;;(setq send-mail-function 'sendmail-send-it
-  ;;      message-send-mail-function 'sendmail-send-it)
-  (setq send-mail-function 'message-send-mail-with-sendmail
-        message-send-mail-function 'message-send-mail-with-sendmail)
-
-  ;; Send program:
-  ;; This is external. Remember we installed it before.
-  (setq sendmail-program (executable-find "msmtp"))
-
-  ;; Select the right sender email from the context.
-  (setq message-sendmail-envelope-from 'header)
-
-  ;; Choose from account before sending
-  ;; This is a custom function that works for me.
-  ;; Well, I stole it somewhere long ago.
-  ;; I suggest using it to make matters easy.
-  ;; Of course, adjust the email addresses and account descriptions.
-  (defun timu/set-msmtp-account ()
-    (if (message-mail-p)
-        (save-excursion
-          (let*
-              ((from (save-restriction
-                       (message-narrow-to-headers)
-                       (message-fetch-field "from")))
-               (account
-                (cond
-                 ((string-match "andrii.dorokhov@icloud.com" from) "icloud")
-                 ((string-match "dorokhov.andrii@gmail.com" from) "official")
-                 ((string-match "wedpositive@gmail.com" from) "gmail"))))
-            (setq message-sendmail-extra-arguments (list '"-a" account))))))
-
-  (add-hook 'message-send-mail-hook 'timu/set-msmtp-account)
-
-  ;; mu4e CC & BCC
-  ;; This is custom as well
-  (add-hook 'mu4e-compose-mode-hook
-            (defun timu/add-cc-and-bcc ()
-              "My Function to automatically add Cc & Bcc: headers.
-              This is in the mu4e compose mode."
-              (save-excursion (message-add-header "Cc:\n"))
-              (save-excursion (message-add-header "Bcc:\n"))))
-
-  ;; mu4e address completion
-  (add-hook 'mu4e-compose-mode-hook 'company-mode)
-
-  ;;optional
-  ;; Store link to message if in header view, not to header query:
-  (setq org-mu4e-link-query-in-headers-mode nil)
-  ;; Don't have to confirm when quitting:
-  (setq mu4e-confirm-quit nil)
-  ;; Number of visible headers in horizontal split view:
-  (setq mu4e-headers-visible-lines 20)
-  ;; Don't show threading by default:
-  (setq mu4e-headers-show-threads nil)
-  ;; Hide annoying "mu4e Retrieving mail..." message in minibuffer:
-  (setq mu4e-hide-index-messages t)
-  ;; Customize the reply-quote-string:
-  (setq message-citation-line-format "%N @ %Y-%m-%d %H:%M :\n")
-  ;; M-x find-function RET message-citation-line-format for docs:
-  (setq message-citation-line-function 'message-insert-formatted-citation-line)
-  ;; By default, do not show related emails:
-  (setq mu4e-headers-include-related nil)
-
-;;bookmarks
-  (add-to-list 'mu4e-bookmarks
-       '(:name "Unread"
-             :query "flag:unread and not flag:trashed"
-             :key ?f)
-       t)
-    (defun dw/go-to-inbox ()
-      (interactive)
-      (mu4e-headers-search dw/mu4e-inbox-query))
-
-  ;; Start mu4e in the background so that it syncs mail periodically
-  (mu4e t))
-
-
-;;MU4E ALERT
-(use-package mu4e-alert
-  :after mu4e
-  :config
-  ;; Show unread emails from all inboxes
-  (setq mu4e-alert-interesting-mail-query "flag:unread AND maildir:/INBOX")
-  ;; Show notifications for mails already notified
-  (setq mu4e-alert-notify-repeated-mails nil)
-  (mu4e-alert-enable-notifications))
-
-
-(use-package mu4e-views
-  :after mu4e
-  :defer nil
-  :bind (:map mu4e-headers-mode-map
-	    ("v" . mu4e-views-mu4e-select-view-msg-method) ;; select viewing method
-	    ("M-n" . mu4e-views-cursor-msg-view-window-down) ;; from headers window scroll the email view
-	    ("M-p" . mu4e-views-cursor-msg-view-window-up) ;; from headers window scroll the email view
-        ("f" . mu4e-views-toggle-auto-view-selected-message) ;; toggle opening messages automatically when moving in the headers view
-        ("i" . mu4e-views-mu4e-view-as-nonblocked-html) ;; show currently selected email with all remote content
-	    )
-  :config
-  (setq mu4e-views-completion-method 'ivy) ;; use ivy for completion
-  (setq mu4e-views-default-view-method "html") ;; make xwidgets default
-  (mu4e-views-mu4e-use-view-msg-method "html") ;; select the default
-  (setq mu4e-views-next-previous-message-behaviour 'stick-to-current-window) ;; when pressing n and p stay in the current window
-  (setq mu4e-views-auto-view-selected-message t)) ;; automatically open messages when moving in the headers view
-
-(after! mu4e-views
-  (setq email-whitelist '("wedpositive@gmail.com" "dorokhov.andrii@gmail.com" "andrii.dorokhov@icloud.com"))
-  (setq mu4e-views-dispatcher-predicate-view-map
-        '((,(lambda (msg)
-             (-contains-p email-whitelist (mu4e-message-field msg :from)))
-           . "html-nonblock")
-          (,(lambda (msg) (mu4e-message-field msg :body-html)) . "html")
-          (,(lambda (msg) (ignore msg) t) . "text"))))
-
-
-;;------------------------MAIL------------------------------------------------
-
-(defvar mu4e-reindex-request-file "/tmp/mu_reindex_now"
-  "Location of the reindex request, signaled by existance")
-(defvar mu4e-reindex-request-min-seperation 5.0
-  "Don't refresh again until this many second have elapsed.
-Prevents a series of redisplays from being called (when set to an appropriate value)")
-
-(defvar mu4e-reindex-request--file-watcher nil)
-(defvar mu4e-reindex-request--file-just-deleted nil)
-(defvar mu4e-reindex-request--last-time 0)
-
-(defun mu4e-reindex-request--add-watcher ()
-  (setq mu4e-reindex-request--file-just-deleted nil)
-  (setq mu4e-reindex-request--file-watcher
-        (file-notify-add-watch mu4e-reindex-request-file
-                               '(change)
-                               #'mu4e-file-reindex-request)))
-
-(defadvice! mu4e-stop-watching-for-reindex-request ()
-  :after #'mu4e--server-kill
-  (if mu4e-reindex-request--file-watcher
-      (file-notify-rm-watch mu4e-reindex-request--file-watcher)))
-
-(defadvice! mu4e-watch-for-reindex-request ()
-  :after #'mu4e--server-start
-  (mu4e-stop-watching-for-reindex-request)
-  (when (file-exists-p mu4e-reindex-request-file)
-    (delete-file mu4e-reindex-request-file))
-  (mu4e-reindex-request--add-watcher))
-
-(defun mu4e-file-reindex-request (event)
-  "Act based on the existance of `mu4e-reindex-request-file'"
-  (if mu4e-reindex-request--file-just-deleted
-      (mu4e-reindex-request--add-watcher)
-    (when (equal (nth 1 event) 'created)
-      (delete-file mu4e-reindex-request-file)
-      (setq mu4e-reindex-request--file-just-deleted t)
-      (mu4e-reindex-maybe t))))
-
-(defun mu4e-reindex-maybe (&optional new-request)
-  "Run `mu4e--server-index' if it's been more than
-`mu4e-reindex-request-min-seperation'seconds since the last request,"
-  (let ((time-since-last-request (- (float-time)
-                                    mu4e-reindex-request--last-time)))
-    (when new-request
-      (setq mu4e-reindex-request--last-time (float-time)))
-    (if (> time-since-last-request mu4e-reindex-request-min-seperation)
-        (mu4e--server-index nil t)
-      (when new-request
-        (run-at-time (* 1.1 mu4e-reindex-request-min-seperation) nil
-                     #'mu4e-reindex-maybe)))))
-(setq mu4e-headers-fields
-      '((:flags . 6)
-        (:account-stripe . 2)
-        (:from-or-to . 25)
-        (:folder . 10)
-        (:recipnum . 2)
-        (:subject . 80)
-        (:human-date . 8))
-      +mu4e-min-header-frame-width 142
-      mu4e-headers-date-format "%d/%m/%y"
-      mu4e-headers-time-format "⧖ %H:%M"
-      mu4e-headers-results-limit 1000
-      mu4e-index-cleanup t)
-
-
-(defvar +mu4e-header--folder-colors nil)
-(setq sendmail-program "/usr/bin/msmtp"
-      send-mail-function #'smtpmail-send-it
-      message-sendmail-f-is-evil t
-      message-sendmail-extra-arguments '("--read-envelope-from"); , "--read-recipients")
-      message-send-mail-function #'message-send-mail-with-sendmail)
-(defun mu4e-compose-from-mailto (mailto-string &optional quit-frame-after)
-  (require 'mu4e)
-  (unless mu4e--server-props (mu4e t) (sleep-for 0.1))
-  (let* ((mailto (message-parse-mailto-url mailto-string))
-         (to (cadr (assoc "to" mailto)))
-         (subject (or (cadr (assoc "subject" mailto)) ""))
-         (body (cadr (assoc "body" mailto)))
-         (headers (-filter (lambda (spec) (not (-contains-p '("to" "subject" "body") (car spec)))) mailto)))
-    (when-let ((mu4e-main (get-buffer mu4e-main-buffer-name)))
-      (switch-to-buffer mu4e-main))
-    (mu4e~compose-mail to subject headers)
-    (when body
-      (goto-char (point-min))
-      (if (eq major-mode 'org-msg-edit-mode)
-          (org-msg-goto-body)
-        (mu4e-compose-goto-bottom))
-      (insert body))
-    (goto-char (point-min))
-    (cond ((null to) (search-forward "To: "))
-          ((string= "" subject) (search-forward "Subject: "))
-          (t (if (eq major-mode 'org-msg-edit-mode)
-                 (org-msg-goto-body)
-               (mu4e-compose-goto-bottom))))
-    (font-lock-ensure)
-    (when evil-normal-state-minor-mode
-      (evil-append 1))
-    (when quit-frame-after
-      (add-hook 'kill-buffer-hook
-                `(lambda ()
-                   (when (eq (selected-frame) ,(selected-frame))
-                     (delete-frame)))))))
-(defvar mu4e-from-name "Andrii Dorokhov"
-  "Name used in \"From:\" template.")
-(defadvice! mu4e~draft-from-construct-renamed (orig-fn)
-  "Wrap `mu4e~draft-from-construct-renamed' to change the name."
-  :around #'mu4e~draft-from-construct
-  (let ((user-full-name mu4e-from-name))
-    (funcall orig-fn)))
-(setq message-signature mu4e-from-name)
-(defun +mu4e-update-personal-addresses ()
-  (let ((primary-address
-         (car (cl-remove-if-not
-               (lambda (a) (eq (mod (apply #'* (cl-coerce a 'list)) 600) 0))
-               (mu4e-personal-addresses)))))
-    (setq +mu4e-personal-addresses
-          (and primary-address
-               (append (mu4e-personal-addresses)
-                       (mapcar
-                        (lambda (subalias)
-                          (concat subalias "@"
-                                  (subst-char-in-string ?@ ?. primary-address)))
-                        '("orgmode"))
-                       (mapcar
-                        (lambda (alias)
-                          (replace-regexp-in-string
-                           "\\`\\(.*\\)@" alias primary-address t t 1))
-                        '("contact" "timothy")))))))
-
-(add-transient-hook! 'mu4e-compose-pre-hook
-  (+mu4e-update-personal-addresses))
-(setq mu4e-sent-folder #'+mu4e-account-sent-folder)
-(defun +mu4e-account-sent-folder (&optional msg)
-  (let ((from (if msg
-                  (plist-get (car (plist-get msg :from)) :email)
-                (save-restriction
-                  (mail-narrow-to-head)
-                  (mail-fetch-field "from")))))
-    (if (and from (string-match "@gmail\\.com>?$" from))
-        "/gmail-com/Sent"
-      "/sent")))
-
-(defun +mu4e-evil-enter-insert-mode ()
-  (when (eq (bound-and-true-p evil-state) 'normal)
-    (call-interactively #'evil-append)))
-
-(add-hook 'mu4e-compose-mode-hook #'+mu4e-evil-enter-insert-mode 90)
-
-(after! mu4e
-  (defun +mu4e-ml-message-link (msg)
-    "Copy the link to MSG on the mailing list archives."
-    (let* ((list-addr (or (mu4e-message-field msg :list)
-                          (thread-last (append (mu4e-message-field-raw msg :list-post)
-                                               (mu4e-message-field msg :to)
-                                               (mu4e-message-field msg :cc))
-                                       (mapcar (lambda (e) (plist-get e :email)))
-                                       (mapcar (lambda (addr)
-                                                 (when (string-match-p "emacs.*@gnu\\.org$" addr)
-                                                   (replace-regexp-in-string "@" "." addr))))
-                                       (delq nil)
-                                       (car))))
-           (msg-url
-            (pcase list-addr
-              ("emacs-orgmode.gnu.org"
-               (format "https://list.orgmode.org/%s" (mu4e-message-field msg :message-id)))
-              (_ (user-error "Mailing list %s not supported" list-addr)))))
-      (message "Link %s copied to clipboard"
-               (propertize (gui-select-text msg-url) 'face '((:weight normal :underline nil) link)))
-      msg-url))
-
-  (add-to-list 'mu4e-view-actions (cons "link to message ML" #'+mu4e-ml-message-link) t))
-(defun +browse-url-orgmode-ml (url &optional _)
-  "Open an orgmode list url using notmuch."
-  (let ((id (and (or (string-match "^https?://orgmode\\.org/list/\\([^/]+\\)" url)
-                     (string-match "^https?://list\\.orgmode\\.org/\\([^/]+\\)" url))
-                 (match-string 1 url))))
-    (mu4e-view-message-with-message-id id)))
-
-(defun +mu4e-compose-org-ml-setup ()
-  (when (string-match-p "\\`orgmode@" user-mail-address)
-    (goto-char (point-min))
-    (save-restriction
-      (mail-narrow-to-head)
-      (when (string-empty-p (mail-fetch-field "to"))
-        (re-search-forward "^To: .*$")
-        (replace-match "To: emacs-orgmode@gnu.org")
-        (advice-add 'message-goto-to :after #'+mu4e-goto-subject-not-to-once)))
-    (when (and org-msg-mode
-               (re-search-forward "^:alternatives: (\\(utf-8 html\\))" nil t))
-      (replace-match "utf-8" t t nil 1))
-    (if org-msg-mode
-        (let ((final-elem (org-element-at-point (point-max))))
-          (when (equal (org-element-property :type final-elem) "signature")
-            (goto-char (org-element-property :contents-begin final-elem))
-            (delete-region (org-element-property :contents-begin final-elem)
-                           (org-element-property :contents-end final-elem))
-            (setq-local org-msg-signature
-                        (format "\n\n#+begin_signature\n%s\n#+end_signature"
-                                (cdr +mu4e-org-ml-signature)))
-            (insert (cdr +mu4e-org-ml-signature) "\n")))
-      (goto-char (point-max))
-      (insert (car +mu4e-org-ml-signature)))
-    (setq default-directory
-          (replace-regexp-in-string
-           (regexp-quote straight-build-dir)
-           "repos"
-           (file-name-directory (locate-library "org"))))))
-
-(defun +mu4e-goto-subject-not-to-once ()
-  (message-goto-subject)
-  (advice-remove 'message-goto-to #'+mu4e-goto-subject-not-to-once))
-
-(defvar +mu4e-org-ml-signature
-  (cons
-   "All the best,
-Andrii Dorokhov"
-   "All the best,\\\\
-@@html:<b>@@Andrii Dorokhov@@html:</b>@@
-
--\u200b- \\\\
-Andrii Dorokhov")
-  "Plain and Org version of the org-ml specific signature.")
-
-(add-hook 'mu4e-compose-mode-hook #'+mu4e-compose-org-ml-setup 1)
-(setq org-msg-signature "\n\n#+begin_signature\nAll the best,\\\\\n@@html:<b>@@Andrii Dorokhov@@html:</b>@@\n#+end_signature")
-(defun +org-msg-goto-body (&optional end)
-  "Go to either the beginning or the end of the body.
-END can be the symbol top, bottom, or nil to toggle."
-  (interactive)
-  (let ((initial-pos (point)))
-    (org-msg-goto-body)
-    (when (or (eq end 'top)
-              (and (or (eq initial-pos (point)) ; Already at bottom
-                       (<= initial-pos ; Above message body
-                           (save-excursion
-                             (message-goto-body)
-                             (point))))
-                   (not (eq end 'bottom))))
-      (message-goto-body)
-      (search-forward (format org-msg-greeting-fmt
-                              (concat " " (org-msg-get-to-name)))))))
-(map! :map org-msg-edit-mode-map
-      :after org-msg
-      :n "G" #'+org-msg-goto-body)
-(defun +org-msg-goto-body-when-replying (compose-type &rest _)
-  "Call `+org-msg-goto-body' when the current message is a reply."
-  (when (and org-msg-edit-mode (eq compose-type 'reply))
-    (+org-msg-goto-body)))
-
-(advice-add 'mu4e~compose-handler :after #'+org-msg-goto-body-when-replying)
-
-;;; config-mail.el ends here
-
-
-
-;;:------------------------
-;;; File Templates
-;;:------------------------
-
-(set-file-template! "\\.tex$" :trigger "__" :mode 'latex-mode)
-(set-file-template! "\\.org$" :trigger "__" :mode 'org-mode)
-(set-file-template! "/LICEN[CS]E$" :trigger '+file-templates/insert-license)
-
-
-;;:------------------------
-;;; Plaintext
-;;:------------------------
-
-;; This block defines `+setup-text-mode-left-margin' and
-;; `+text-mode-left-margin-width'.
-
-(after! text-mode
-  (add-hook! 'text-mode-hook
-    (unless (derived-mode-p 'org-mode)
-      ;; Apply ANSI color codes
-      (with-silent-modifications
-        (ansi-color-apply-on-region (point-min) (point-max) t)))))
-(defvar +text-mode-left-margin-width 1
-  "The `left-margin-width' to be used in `text-mode' buffers.")
-
-(defun +setup-text-mode-left-margin ()
-  (when (and (derived-mode-p 'text-mode)
-             (not (and (bound-and-true-p visual-fill-column-mode)
-                       visual-fill-column-center-text))
-             (eq (current-buffer) ; Check current buffer is active.
-                 (window-buffer (frame-selected-window))))
-    (setq left-margin-width (if display-line-numbers
-                                0 +text-mode-left-margin-width))
-    (set-window-buffer (get-buffer-window (current-buffer))
-                       (current-buffer))))
-
-(add-hook 'window-configuration-change-hook #'+setup-text-mode-left-margin)
-(add-hook 'display-line-numbers-mode-hook #'+setup-text-mode-left-margin)
-(add-hook 'text-mode-hook #'+setup-text-mode-left-margin)
-(defadvice! +doom/toggle-line-numbers--call-hook-a ()
-  :after #'doom/toggle-line-numbers
-  (run-hooks 'display-line-numbers-mode-hook))
-(remove-hook 'text-mode-hook #'display-line-numbers-mode)
-
-;;:------------------------
-;;; !Pkg org-modern
-;;:------------------------
 
 ;;:------------------------
 ;;; Markdown
@@ -1824,38 +431,38 @@ END can be the symbol top, bottom, or nil to toggle."
   :hook (python-mode . format-all-mode)
   :config
   (setq python-indent-level 4)
-  (setq python-shell-virtualenv-path "/Users/apogee/.local/share/virtualenvs/myenv/")
+;;  (setq python-shell-virtualenv-path "/Users/apogee/.local/share/virtualenvs/myenv/")
   (add-hook 'python-mode-hook
             (lambda ()
               (require 'lsp-pyright)
               (lsp-deferred)
               (setq indent-tabs-mode nil)
               (setq tab-width 4)))
-  (pyvenv-activate "/Users/apogee/.local/share/virtualenvs/myenv")
+;;  (pyvenv-activate "/Users/apogee/.local/share/virtualenvs/myenv")
   )
 
 ;;PYENV
 
-(use-package! pipenv
-  :defer t
-  :hook (python-mode . pipenv-mode)
-  :config
-  (pyvenv-workon "/Users/apogee/.local/share/virtualenvs/myenv")  
-  (setq pipenv-projectile-after-switch-function #'pipenv-projectile-after-switch-extended))
+;;(use-package! pipenv
+;;  :defer t
+;;  :hook (python-mode . pipenv-mode)
+;;  :config
+;;  (pyvenv-workon "/Users/apogee/.local/share/virtualenvs/myenv")  
+;;  (setq pipenv-projectile-after-switch-function #'pipenv-projectile-after-switch-extended))
 
 ;;Add myvenv
-(defun my-activate-virtualenv ()
-  (interactive)
-  (let ((venv-path "/Users/apogee/.local/share/virtualenvs/myenv/bin/activate"))
-    (when (file-exists-p venv-path)
-      (vterm-send-string (format "source %s" venv-path))
-     (vterm-send-return))))
+;;(defun my-activate-virtualenv ()
+;;  (interactive)
+;;  (let ((venv-path "/Users/apogee/.local/share/virtualenvs/myenv/bin/activate"))
+;;    (when (file-exists-p venv-path)
+;;      (vterm-send-string (format "source %s" venv-path))
+;;     (vterm-send-return))))
 
 
-(use-package pyvenv
-  :config
-  (pyvenv-mode 1)
-  (pyvenv-workon "myenv"))
+;;(use-package pyvenv
+;;  :config
+;;  (pyvenv-mode 1)
+;;  (pyvenv-workon "myenv"))
 
 ;;:------------------------
 ;;; DEBUG
@@ -1895,10 +502,8 @@ END can be the symbol top, bottom, or nil to toggle."
               ("SPC d e" . dap-debug-edit-template))
   :init
   (dap-mode 1)
-  (dap-ui-controls-mode 1)  ; Відображення панелі з кнопками відлагодження
+  (dap-ui-controls-mode 1) 
   (setq dap-auto-configure-features '(sessions locals)))
-
-
 
 
 ;;:------------------------
@@ -2055,25 +660,10 @@ END can be the symbol top, bottom, or nil to toggle."
 
 
 ;;:------------------------
-;;; SASS AUTOFIX
-;;:------------------------
-
-(defun my-run-sass-auto-fix ()
-  "Run sass auto fix if cli tool exist"
-  (interactive)
-  (save-window-excursion
-    (let ((default-directory (file-name-directory buffer-file-name)))
-      (async-shell-command "sass-lint-auto-fix")
-      ;; (revert-buffer-no-confirm)
-      (message "SASS FORMATTED"))))
-
-;;:------------------------
 ;;; Styled-components NPM
 ;;:------------------------
 
-
 (use-package! polymode
-   :ensure t
    :after rjsx-mode
    :config
    (define-hostmode poly-rjsx-hostmode nil
@@ -2126,6 +716,8 @@ END can be the symbol top, bottom, or nil to toggle."
   :defer t
   :hook (json-mode . format-all-mode))
 
+
+
 ;;:------------------------
 ;;; SASS AUTOFIX
 ;;:------------------------
@@ -2150,6 +742,8 @@ END can be the symbol top, bottom, or nil to toggle."
               ("SPC f ]" . flycheck-next-error)
               ("SPC f [" . flycheck-previous-error)
               ("SPC e l" . flycheck-list-errors)))
+(global-flycheck-mode)
+(add-hook 'after-init-hook #'global-flycheck-mode)
 
 ;;:------------------------
 ;;; Formatters
@@ -2166,6 +760,8 @@ END can be the symbol top, bottom, or nil to toggle."
   :config
   (global-set-key (kbd "M-F") #'ian/format-code)
   (add-hook 'prog-mode-hook #'format-all-ensure-formatter))
+
+
 
 ;;:------------------------
 ;;; PRETTIER
@@ -2387,6 +983,7 @@ END can be the symbol top, bottom, or nil to toggle."
 (use-package! string-inflection
   :defer t
   :bind ("C-s-c" . string-inflection-all-cycle))
+
 ;;:------------------------
 ;;; Type from json
 ;;:------------------------
@@ -2411,55 +1008,6 @@ END can be the symbol top, bottom, or nil to toggle."
 
 
 ;;:------------------------
-;;; !Pkg treemacs
-;;:------------------------
-(after! treemacs
-  (defvar treemacs-file-ignore-extensions '()
-    "File extension which `treemacs-ignore-filter' will ensure are ignored")
-  (defvar treemacs-file-ignore-globs '()
-    "Globs which will are transformed to `treemacs-file-ignore-regexps' which `treemacs-ignore-filter' will ensure are ignored")
-  (defvar treemacs-file-ignore-regexps '()
-    "RegExps to be tested to ignore files, generated from `treeemacs-file-ignore-globs'")
-  (defun treemacs-ignore-filter (file full-path)
-    "Ignore files specified by `treemacs-file-ignore-extensions', and `treemacs-file-ignore-regexps'"
-    (or (member (file-name-extension file) treemacs-file-ignore-extensions)
-        (let ((ignore-file nil))
-          (dolist (regexp treemacs-file-ignore-regexps ignore-file)
-            (setq ignore-file (or ignore-file (if (string-match-p regexp full-path) t nil)))))))
-  (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore-filter))
-(setq treemacs-file-ignore-extensions
-      '(;; LaTeX
-        "aux"
-        "ptc"
-        "fdb_latexmk"
-        "fls"
-        "synctex.gz"
-        "toc"
-        ;; LaTeX - glossary
-        "glg"
-        "glo"
-        "gls"
-        "glsdefs"
-        "ist"
-        "acn"
-        "acr"
-        "alg"
-        ;; LaTeX - pgfplots
-        "mw"
-        ;; LaTeX - pdfx
-        "pdfa.xmpi"
-        ))
-(setq treemacs-file-ignore-globs
-      '(;; LaTeX
-        "*/_minted-*"
-        ;; AucTeX
-        "*/.auctex-auto"
-        "*/_region_.log"
-        "*/_region_.tex"))
-
-
-
-;;:------------------------
 ;;; Yasnippets
 ;;:------------------------
 
@@ -2467,6 +1015,7 @@ END can be the symbol top, bottom, or nil to toggle."
               "~/.config/doom/yasnippet")
 (require 'yasnippet)
 (yas-global-mode 1)
+
 
 ;;:------------------------
 ;;; Keys
@@ -2576,82 +1125,6 @@ END can be the symbol top, bottom, or nil to toggle."
 (global-set-key (kbd "C-c C-x") 'run-python)
 
 
-;;:------------------------
-;;EDIT
-;;:------------------------
-
-;;Set default tab char’s display width to 4 spaces
-(setq-default tab-width 4)
-(setq-default indent-tabs-mode nil)
-;; make tab key always call a indent command.
-;;(setq-default tab-always-indent t)
-;; make tab key call indent command or insert tab character, depending on cursor position
-;;(setq-default tab-always-indent nil)
-;; make tab key do indent first then completion.
-;;(setq-default tab-always-indent 'complete)
-
-;;Set fill-column
-(setq-default fill-column 88)
-
-;;Delete trailing whitespace before saving
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
-
-;;Overwrite active region
-(delete-selection-mode t)
-
-;;Indent new line automatically on ENTER
-(global-set-key (kbd "RET") 'newline-and-indent)
-
-;;Multiple Cursors
-(use-package multiple-cursors
-  :config
-  (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines))
-
-;;Enable moving line or region, up or down
-(use-package move-text
-  :config
-  (move-text-default-bindings))
-
-;;Expand region
-(use-package expand-region
-  :config
-  (global-set-key (kbd "C-=") 'er/expand-region))
-
-
-(use-package undo-fu
-  :config
-  (global-unset-key (kbd "C-z"))
-  (global-set-key (kbd "C-z")   'undo-fu-only-undo)
-  (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
-
-
-;;Navigation
-
-(defun switch-to-first-matching-buffer (regex)
-  (switch-to-buffer (car (remove-if-not (apply-partially #'string-match-p regex)
-                                        (mapcar #'buffer-name (buffer-list))))))
-;;Focus buffer by name
-
-(defun +select-window-by-name (regexp)
-  "Selects the window with buffer NAME"
-  (select-window
-   (car (seq-filter
-     (lambda (window)
-       (string-match-p regexp (buffer-name (window-buffer window))))
-     (window-list-1 nil 0 t)))))
-
-;;Simplify whitespace style
-(setq-default whitespace-style (quote (spaces tabs newline space-mark tab-mark newline-mark)))
-
-;;Enable soft-wrap lines
-(global-visual-line-mode t)
-
-;;Highlight syntax
-(global-font-lock-mode t)
-
-;;Highlight current line
-;;(global-hl-line-mode +1)
-
 
 ;;:------------------------
 ;;; Vterm
@@ -2681,6 +1154,8 @@ END can be the symbol top, bottom, or nil to toggle."
   (setq vterm-kill-buffer-on-exit nil)
   (setq vterm-toggle-scope 'project))
 
+
+
 ;;:------------------------
 ;;; ORG
 ;;:------------------------
@@ -2702,7 +1177,6 @@ END can be the symbol top, bottom, or nil to toggle."
   (format-all-ensure-formatter)
   (format-all-buffer)
   (org-edit-src-exit))
-
 
 ;; Crypt
 
@@ -2854,6 +1328,8 @@ END can be the symbol top, bottom, or nil to toggle."
   (setq plstore-cache-passphrase-for-symmetric-encryption t)
   (setq org-caldav-url 'google))
 
+
+
 ;; Prettify org priority
 
 (use-package! org-fancy-priorities
@@ -2884,6 +1360,8 @@ END can be the symbol top, bottom, or nil to toggle."
   :defer 5
   :hook (org-mode . org-superstar-mode))
 
+
+
 ;; Org roam
 ;; One of the best Zettelkasten implementation
 
@@ -2912,6 +1390,8 @@ END can be the symbol top, bottom, or nil to toggle."
   :after org-roam)
 
 
+
+
 ;; Visual roam ui nodes
 
 (use-package! org-roam-ui
@@ -2922,6 +1402,8 @@ END can be the symbol top, bottom, or nil to toggle."
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start t
         org-roam-ui-browser-function #'xwidget-webkit-browse-url))
+
+
 
 ;; Image inserting to org documents
 
@@ -2947,6 +1429,8 @@ END can be the symbol top, bottom, or nil to toggle."
   (org-link-set-parameters
    "imghttps"
    :image-data-fun #'org-image-link))
+
+
 
 ;; Roam publisher
 ;; My own package for publish roam files

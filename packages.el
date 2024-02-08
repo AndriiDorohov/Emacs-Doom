@@ -59,7 +59,7 @@
 
 (package! ivy-posframe)
 (package! bm)
-(package! rainbow-mode)
+;;(package! rainbow-mode)
 (package! nyan-mode)
 (package! tree-edit)
 
@@ -79,7 +79,7 @@
 (package! highlight-indent-guides)
 
 ;;; AUTOCOMPLETE
-(package! corfu)
+;;(package! corfu)
 
 ;;; JS/TS
 (package! tide)
@@ -101,30 +101,31 @@
 (package! emmet-mode)
 (package! prettier)
 (package! format-all)
+(package! apheleia)
 
 ;;DEBUG
 (package! dap-mode)
 
 ;;GIT
 (package! msgu :recipe (:host github :repo "jcs-elpa/msgu"))
-(package! forge)
-(package! blamer)
+;;(package! forge)
+;;(package! blamer)
 ;;(package! sideline :recipe (:host github :repo "emacs-sideline/sideline"))
 ;;(package! sideline-blame :recipe (:host github :repo "emacs-sideline/sideline-blame"))
 ;;(package! sideline-lsp)
 ;;(package! sideline-flycheck)
-(package! gist)
-(package! git-messenger)
+;;(package! gist)
+;;(package! git-messenger)
 
 ;;TERMINAL
 (package! multi-vterm)
 (package! vterm-toggle)
 
 ;;;; Jinja
-(package! jinja2-mode)
+;;(package! jinja2-mode)
 
 ;;;; Python
-(package! pyvenv)
+;;(package! pyvenv)
 (package! python-mode)
 (package! auto-complete)
 (package! lsp-python-ms)
@@ -143,17 +144,17 @@
 (package! hydra)
 
 ;;HTTP
-(package! websocket)
-(package! restclient)
+;;(package! websocket)
+;;(package! restclient)
 
 ;;EDIT
-(package! move-text)
+;;(package! move-text)
 
 ;;EMAIL
-(package! mu4e-alert)
-(package! mu4e-views)
-(package! xwwp)
-(package! xwidgets-reuse)
+;;(package! mu4e-alert)
+;;(package! mu4e-views)
+;;(package! xwwp)
+;;(package! xwidgets-reuse)
 
 ;;;; Vue volar lsp
 (package! lsp-volar :recipe (:host github :repo "jadestrong/lsp-volar"))
@@ -167,31 +168,45 @@
 ;;OTHERS
 (package! turbo-log :recipe (:host github :repo "artawower/turbo-log"))
 (package! reverse-im)
-(package! grip-mode)
 (package! origami)
 (package! lsp-grammarly)
 (package! outline-minor-faces)
-(package! google-translate)
-(package! telega)
-(package! minions)
+;;(package! google-translate)
+;;(package! telega)
+;;(package! minions)
 
-(package! vlf :recipe (:host github :repo "emacs-straight/vlf" :files ("*.el"))
-  :pin "cacdb359f8c37c6e7e4c7937462b632d22462130")
-(package! aas :recipe (:host github :repo "ymarco/auto-activating-snippets")
-  :pin "e92b5cffa4e87c221c24f3e72ae33959e1ec2b68")
+;;; Templates
+;;;; Markdown
+(package! grip-mode)
 
-(package! screenshot :recipe (:host github :repo "tecosaur/screenshot"))
+;;; Infrastucture
+;;(package! docker-compose-mode)
+;;(package! dockerfile-mode)
+;;(package! jenkinsfile-mode)
+;; (package! company-nginx)
+;;(package! nginx-mode)
+;;(package! kubernetes)
+;;(package! kubernetes-evil)
+;;(package! k8s-mode)
 
-(package! etrace :recipe (:host github :repo "aspiers/etrace")
-  :pin "2291ccf2f2ccc80a6aac4664e8ede736ceb672b7")
-(package! theme-magic :pin "844c4311bd26ebafd4b6a1d72ddcc65d87f074e3")
-(package! string-inflection :pin "50ad54970b3cc79b6b83979bde9889ad9a9e1a9c")
-(package! info-colors :pin "2e237c301ba62f0e0286a27c1abe48c4c8441143")
-(package! keycast :pin "72d9add8ba16e0cae8cfcff7fc050fa75e493b4e")
 
-(package! gif-screencast :pin "adec408e6adab2e8e057fe0ad828749f473bfb83")
-(package! page-break-lines :recipe (:host github :repo "purcell/page-break-lines")
-  :pin "79eca86e0634ac68af862e15c8a236c37f446dcd")
+;;(package! vlf :recipe (:host github :repo "emacs-straight/vlf" :files ("*.el"))
+;;  :pin "cacdb359f8c37c6e7e4c7937462b632d22462130")
+;;(package! aas :recipe (:host github :repo "ymarco/auto-activating-snippets")
+;;  :pin "e92b5cffa4e87c221c24f3e72ae33959e1ec2b68")
+
+;;(package! screenshot :recipe (:host github :repo "tecosaur/screenshot"))
+
+;;(package! etrace :recipe (:host github :repo "aspiers/etrace")
+;;  :pin "2291ccf2f2ccc80a6aac4664e8ede736ceb672b7")
+;;(package! theme-magic :pin "844c4311bd26ebafd4b6a1d72ddcc65d87f074e3")
+;;(package! string-inflection :pin "50ad54970b3cc79b6b83979bde9889ad9a9e1a9c")
+;;(package! info-colors :pin "2e237c301ba62f0e0286a27c1abe48c4c8441143")
+;;(package! keycast :pin "72d9add8ba16e0cae8cfcff7fc050fa75e493b4e")
+
+;;(package! gif-screencast :pin "adec408e6adab2e8e057fe0ad828749f473bfb83")
+;;(package! page-break-lines :recipe (:host github :repo "purcell/page-break-lines")
+;;  :pin "79eca86e0634ac68af862e15c8a236c37f446dcd")
 
 
 
@@ -204,8 +219,8 @@
 (package! quicktype :recipe (:host github :repo "artawower/quicktype.el"))
 
 ;;; Org mode
-;; (package! polymode)
-;; (package! poly-org)
+(package! polymode)
+(package! poly-org)
 (package! ox-gfm)
 (package! ob-dart)
 (package! oauth2)
@@ -225,5 +240,6 @@
 ;;;; Rss
 (package! elfeed-score)
 ;;;; Pocket
-(package! pocket-reader)
+;;(package! pocket-reader)
 ;;; Agenda
+
